@@ -193,7 +193,7 @@ try {
                             <div class="card gig-card">
                                 <div class="card-body">
                                     <!-- Freelancer Info -->
-                                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                                    <a href="/freelancer-profile.php?id=<?php echo $gig['freelancer_id']; ?>" class="text-decoration-none" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
                                         <?php if ($gig['profile_pic']): ?>
                                             <img src="/uploads/profiles/<?php echo htmlspecialchars($gig['profile_pic']); ?>" 
                                                  alt="<?php echo htmlspecialchars($gig['freelancer_name']); ?>" 
@@ -215,7 +215,7 @@ try {
                                                 </span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </a>
                                     
                                     <!-- Gig Info -->
                                     <h5 class="gig-title">

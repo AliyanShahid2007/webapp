@@ -78,21 +78,7 @@ if ($is_logged_in) {
                         
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle">
-                                <?php if ($user_data && $user_data['role'] == 'freelancer'): ?>
-                                    <?php
-                                    $pdo = getPDOConnection();
-                                    $stmt = $pdo->prepare("SELECT profile_pic FROM freelancer_profiles WHERE user_id = ?");
-                                    $stmt->execute([$user_id]);
-                                    $profile = $stmt->fetch();
-                                    ?>
-                                    <?php if ($profile && $profile['profile_pic']): ?>
-                                        <img src="/uploads/profiles/<?php echo htmlspecialchars($profile['profile_pic']); ?>" alt="Profile" class="profile-image">
-                                    <?php else: ?>
-                                        <i class="fas fa-user-circle"></i>
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    <i class="fas fa-user-circle"></i>
-                                <?php endif; ?>
+                                <i class="fas fa-user-circle"></i>
                                 <?php echo htmlspecialchars($user_data['name']); ?>
                             </a>
                         </li>
