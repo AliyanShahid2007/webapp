@@ -7,7 +7,7 @@ requireRole('admin');
 $action = $_GET['action'] ?? '';
 $user_id = (int)($_GET['id'] ?? 0);
 
-if (!$user_id || !in_array($action, ['approve', 'reject', 'suspend_7days', 'suspend_permanent', 'activate'])) {
+if (!$user_id || !in_array($action, ['approve', 'reject', 'suspend_7days', 'suspend_permanent', 'activate', 'manage', 'update'])) {
     redirectWithMessage('/admin/dashboard.php', 'Invalid action', 'danger');
 }
 
@@ -20,7 +20,7 @@ try {
     $user = $stmt->fetch();
     
     if (!$user) {
-        redirectWithMessage('/admin/dashboard.php', 'User not found', 'danger');
+    redirectWithMessage('/admin/dashboard.php', 'User not found', 'danger');
     }
     
     // Don't allow action on admin users
@@ -32,14 +32,14 @@ try {
         case 'approve':
             $stmt = $pdo->prepare("UPDATE users SET status = 'active' WHERE id = ?");
             $stmt->execute([$user_id]);
-            redirectWithMessage('/admin/dashboard.php', 'User approved successfully', 'success');
+            redirectWithMessage('/admin/users.php', 'User approved successfully', 'success');
             break;
             
         case 'reject':
             // Delete user and related data
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
             $stmt->execute([$user_id]);
-            redirectWithMessage('/admin/dashboard.php', 'User rejected and removed', 'success');
+            redirectWithMessage('/admin/users.php', 'User rejected and removed', 'success');
             break;
             
         case 'suspend_7days':
@@ -60,9 +60,39 @@ try {
             $stmt->execute([$user_id]);
             redirectWithMessage('/admin/users.php', 'User activated successfully', 'success');
             break;
+
+        case 'manage':
+            // Redirect to manage user page
+            header('Location: ' . BASE_PATH . '/admin/manage-user.php?id=' . $user_id);
+            exit;
+
+        case 'update':
+            // Handle POST data for updating user
+            $name = trim($_POST['name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $role = $_POST['role'] ?? '';
+            $status = $_POST['status'] ?? '';
+
+            if (!$name || !$email || !in_array($role, ['client', 'freelancer']) || !in_array($status, ['active', 'pending', 'suspended_7days', 'suspended_permanent'])) {
+                redirectWithMessage(BASE_PATH . '/admin/manage-user.php?id=' . $user_id, 'Invalid input data', 'danger');
+            }
+
+            // Check if email is already taken by another user
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+            $stmt->execute([$email, $user_id]);
+            if ($stmt->fetch()) {
+                redirectWithMessage(BASE_PATH . '/admin/manage-user.php?id=' . $user_id, 'Email already in use', 'danger');
+            }
+
+            // Update user
+            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, role = ?, status = ? WHERE id = ?");
+            $stmt->execute([$name, $email, $role, $status, $user_id]);
+
+            redirectWithMessage('/admin/users.php', 'User updated successfully', 'success');
+            break;
     }
     
 } catch (Exception $e) {
     error_log($e->getMessage());
-    redirectWithMessage('/admin/dashboard.php', 'An error occurred', 'danger');
+    redirectWithMessage('/admin/users.php', 'An error occurred while processing the action', 'danger');
 }

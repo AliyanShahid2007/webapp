@@ -27,10 +27,63 @@ try {
     }
     
     if ($search) {
-        $where_clauses[] = "(g.title LIKE ? OR g.description LIKE ?)";
-        $search_term = "%$search%";
-        $params[] = $search_term;
-        $params[] = $search_term;
+        $search_lower = strtolower($search);
+
+        // Create multiple search terms for common variations
+        $search_terms = ["%" . $search_lower . "%"];
+
+        // Common misspellings and their corrections
+        $spelling_corrections = [
+            'developement' => 'development',
+            'desing' => 'design',
+            'programing' => 'programming',
+            'marketting' => 'marketing',
+            'writting' => 'writing',
+            'grafic' => 'graphic',
+            'websit' => 'website',
+            'mobil' => 'mobile',
+            'aplication' => 'app',
+            'softwere' => 'software',
+            'bussiness' => 'business',
+            'managment' => 'management',
+            'consultting' => 'consulting',
+            'fotografy' => 'photography',
+            'vidio' => 'video',
+            'editting' => 'editing',
+            'translatin' => 'translation',
+            'datta' => 'data',
+            'analisis' => 'analysis',
+            'reserch' => 'research'
+        ];
+
+        // Add variations for common typos (bidirectional)
+        foreach ($spelling_corrections as $misspelled => $correct) {
+            if (strpos($search_lower, $misspelled) !== false) {
+                $search_terms[] = "%" . str_replace($misspelled, $correct, $search_lower) . "%";
+            }
+            if (strpos($search_lower, $correct) !== false) {
+                $search_terms[] = "%" . str_replace($correct, $misspelled, $search_lower) . "%";
+            }
+        }
+
+        // Add common abbreviations
+        if (strpos($search_lower, 'development') !== false) {
+            $search_terms[] = "%" . str_replace('development', 'dev', $search_lower) . "%";
+        }
+        if (strpos($search_lower, 'developement') !== false) {
+            $search_terms[] = "%" . str_replace('developement', 'dev', $search_lower) . "%";
+        }
+
+        $gig_conditions = [];
+        foreach ($search_terms as $term) {
+            $gig_conditions[] = "(LOWER(g.title) LIKE ? OR LOWER(g.description) LIKE ? OR LOWER(u.name) LIKE ? OR LOWER(fp.category) LIKE ?)";
+            $params[] = $term;
+            $params[] = $term;
+            $params[] = $term;
+            $params[] = $term;
+        }
+
+        $where_clauses[] = "(" . implode(' OR ', $gig_conditions) . ")";
     }
     
     if ($min_budget > 0) {
@@ -89,9 +142,81 @@ try {
     $stmt->execute($params);
     $gigs = $stmt->fetchAll();
     
+    // Get freelancers if searching
+    $freelancers = [];
+    if ($search) {
+        $search_lower = strtolower($search);
+        $search_term = "%" . $search_lower . "%";
+
+        // Create multiple search terms for common variations
+        $search_terms = [$search_term];
+
+        // Common misspellings and their corrections
+        $spelling_corrections = [
+            'developement' => 'development',
+            'desing' => 'design',
+            'programing' => 'programming',
+            'marketting' => 'marketing',
+            'writting' => 'writing',
+            'grafic' => 'graphic',
+            'websit' => 'website',
+            'mobil' => 'mobile',
+            'aplication' => 'app',
+            'softwere' => 'software',
+            'bussiness' => 'business',
+            'managment' => 'management',
+            'consultting' => 'consulting',
+            'fotografy' => 'photography',
+            'vidio' => 'video',
+            'editting' => 'editing',
+            'translatin' => 'translation',
+            'datta' => 'data',
+            'analisis' => 'analysis',
+            'reserch' => 'research'
+        ];
+
+        // Add variations for common typos (bidirectional)
+        foreach ($spelling_corrections as $misspelled => $correct) {
+            if (strpos($search_lower, $misspelled) !== false) {
+                $search_terms[] = "%" . str_replace($misspelled, $correct, $search_lower) . "%";
+            }
+            if (strpos($search_lower, $correct) !== false) {
+                $search_terms[] = "%" . str_replace($correct, $misspelled, $search_lower) . "%";
+            }
+        }
+
+        // Add common abbreviations
+        if (strpos($search_lower, 'development') !== false) {
+            $search_terms[] = "%" . str_replace('development', 'dev', $search_lower) . "%";
+        }
+        if (strpos($search_lower, 'developement') !== false) {
+            $search_terms[] = "%" . str_replace('developement', 'dev', $search_lower) . "%";
+        }
+
+        $freelancer_conditions = [];
+        $freelancer_params = [];
+        foreach ($search_terms as $term) {
+            $freelancer_conditions[] = "(LOWER(u.name) LIKE ? OR LOWER(fp.category) LIKE ? OR LOWER(fp.bio) LIKE ?)";
+            $freelancer_params[] = $term;
+            $freelancer_params[] = $term;
+            $freelancer_params[] = $term;
+        }
+
+        $freelancer_sql = "SELECT u.id, u.name, u.username, fp.profile_pic, fp.category, fp.rating, fp.total_reviews, fp.bio
+                          FROM users u
+                          JOIN freelancer_profiles fp ON u.id = fp.user_id
+                          WHERE u.status = 'active' AND u.role = 'freelancer'
+                          AND (" . implode(' OR ', $freelancer_conditions) . ")
+                          ORDER BY fp.rating DESC, fp.total_reviews DESC
+                          LIMIT 6";
+        $freelancer_stmt = $pdo->prepare($freelancer_sql);
+        $freelancer_stmt->execute($freelancer_params);
+        $freelancers = $freelancer_stmt->fetchAll();
+    }
+
     // Get categories for filter
     $categories = $pdo->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name")->fetchAll();
-    
+
     // Calculate pagination
     $total_pages = ceil($total_gigs / $per_page);
     
@@ -167,7 +292,7 @@ try {
                             <i class="fas fa-search"></i> Apply Filters
                         </button>
                         
-                        <a href="/browse-gigs.php" class="btn btn-outline btn-block" style="margin-top: 0.5rem;">
+                        <a href="<?php echo $base_path; ?>/browse-gigs.php" class="btn btn-outline btn-block" style="margin-top: 0.5rem;">
                             <i class="fas fa-times"></i> Clear Filters
                         </a>
                     </form>
@@ -177,6 +302,64 @@ try {
         
         <!-- Gigs Grid -->
         <div class="col-md-9">
+            <!-- Freelancers Section -->
+            <?php if ($search && count($freelancers) > 0): ?>
+            <div class="mb-4">
+                <h3 style="color: var(--text-primary); margin-bottom: 1rem;">
+                    <i class="fas fa-users"></i> Matching Freelancers
+                </h3>
+                <div class="row">
+                    <?php foreach ($freelancers as $freelancer): ?>
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="card text-center animate-on-scroll card-hover" style="border-radius: 15px; overflow: hidden;">
+                                <div class="card-body p-4">
+                                    <a href="<?php echo $base_path; ?>/freelancer-profile.php?id=<?php echo $freelancer['id']; ?>" class="text-decoration-none">
+                                        <?php if ($freelancer['profile_pic']): ?>
+                                            <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($freelancer['profile_pic']); ?>"
+                                                 alt="<?php echo htmlspecialchars($freelancer['name']); ?>"
+                                                 class="profile-image profile-image-lg"
+                                                 style="display: block; margin: 0 auto 1rem; border: 4px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                        <?php else: ?>
+                                            <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: 600; margin: 0 auto 1rem; border: 4px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                                <?php echo strtoupper(substr($freelancer['name'], 0, 1)); ?>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <h5 style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.5rem;">
+                                            <?php echo htmlspecialchars($freelancer['name']); ?>
+                                        </h5>
+                                    </a>
+
+                                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                                        <i class="fas fa-tag me-1"></i>
+                                        <?php echo htmlspecialchars($freelancer['category'] ?? 'Freelancer'); ?>
+                                    </p>
+
+                                    <div class="rating" style="justify-content: center; margin-bottom: 1.5rem;">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <i class="fas fa-star <?php echo $i <= $freelancer['rating'] ? 'star' : 'text-muted'; ?>"></i>
+                                        <?php endfor; ?>
+                                        <div class="mt-2">
+                                            <span style="color: var(--text-primary); font-weight: 600; font-size: 1.1rem;">
+                                                <?php echo number_format($freelancer['rating'], 1); ?>
+                                            </span>
+                                            <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                                                (<?php echo $freelancer['total_reviews']; ?> reviews)
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <a href="<?php echo $base_path; ?>/freelancer-profile.php?id=<?php echo $freelancer['id']; ?>" class="btn btn-outline-primary btn-sm btn-hover-lift w-100">
+                                        <i class="fas fa-eye me-1"></i> View Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <div class="mb-3" style="display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="color: var(--text-primary); margin-bottom: 0;">
                     <i class="fas fa-briefcase"></i> Browse Gigs
@@ -193,10 +376,10 @@ try {
                             <div class="card gig-card">
                                 <div class="card-body">
                                     <!-- Freelancer Info -->
-                                    <a href="/freelancer-profile.php?id=<?php echo $gig['freelancer_id']; ?>" class="text-decoration-none" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                                    <a href="<?php echo $base_path; ?>/freelancer-profile.php?id=<?php echo $gig['freelancer_id']; ?>" class="text-decoration-none" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
                                         <?php if ($gig['profile_pic']): ?>
-                                            <img src="/uploads/profiles/<?php echo htmlspecialchars($gig['profile_pic']); ?>" 
-                                                 alt="<?php echo htmlspecialchars($gig['freelancer_name']); ?>" 
+                                            <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($gig['profile_pic']); ?>"
+                                                 alt="<?php echo htmlspecialchars($gig['freelancer_name']); ?>"
                                                  class="profile-image">
                                         <?php else: ?>
                                             <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
@@ -239,7 +422,7 @@ try {
                                         <div class="gig-price">
                                             $<?php echo number_format($gig['budget'], 2); ?>
                                         </div>
-                                        <a href="/gig-details.php?id=<?php echo $gig['id']; ?>" class="btn btn-primary btn-sm">
+                                        <a href="<?php echo $base_path; ?>/gig-details.php?id=<?php echo $gig['id']; ?>" class="btn btn-primary btn-sm">
                                             View Details
                                         </a>
                                     </div>
@@ -287,7 +470,7 @@ try {
                     <p style="color: var(--text-secondary);">
                         Try adjusting your filters or search terms
                     </p>
-                    <a href="/browse-gigs.php" class="btn btn-primary">
+                    <a href="<?php echo $base_path; ?>/browse-gigs.php" class="btn btn-primary">
                         Clear All Filters
                     </a>
                 </div>

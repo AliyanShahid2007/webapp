@@ -19,11 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
     initProgressBars();
     initCharacterCounters();
     initRatingStars();
-    initDropdowns();
-    initMobileMenu();
+
+
     initScrollEffects();
     initFileUpload();
-    
+    initCountUp(); // Initialize count-up animation immediately
+    initMobileMenu();
+
     console.log('✅ FreelanceHub Enhanced - Ready!');
 });
 
@@ -177,7 +179,7 @@ function initAnimations() {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
-    
+
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -187,7 +189,7 @@ function initAnimations() {
             }
         });
     }, observerOptions);
-    
+
     // Animate cards on scroll
     const animatedElements = document.querySelectorAll('.card, .stats-card');
     animatedElements.forEach((el, index) => {
@@ -197,6 +199,72 @@ function initAnimations() {
         el.style.transitionDelay = `${index * 0.1}s`;
         observer.observe(el);
     });
+
+    // Count up animation for statistics
+    initCountUp();
+}
+
+// ==================== COUNT UP ANIMATION ====================
+function initCountUp() {
+    const countUpElements = document.querySelectorAll('.count-up');
+
+    // Trigger animation immediately for all elements
+    countUpElements.forEach(el => {
+        const target = parseInt(el.getAttribute('data-target')) || 0;
+        animateCountUp(el, target);
+    });
+
+    // Update stats immediately and then every 30 seconds
+    updateStats(); // Initial update
+    setInterval(updateStats, 30000);
+}
+
+// ==================== DYNAMIC STATS UPDATE ====================
+function updateStats() {
+    fetch(window.basePath + '/api/stats.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                updateStatCard('total_freelancers', data.data.total_freelancers);
+                updateStatCard('total_gigs', data.data.total_gigs);
+                updateStatCard('completed_orders', data.data.completed_orders);
+                updateStatCard('total_clients', data.data.total_clients);
+            }
+        })
+        .catch(error => console.error('Error updating stats:', error));
+}
+
+function updateStatCard(statName, newValue) {
+    const element = document.querySelector(`[data-stat="${statName}"]`);
+    if (element) {
+        const currentValue = parseInt(element.getAttribute('data-target')) || 0;
+        if (currentValue !== newValue) {
+            element.setAttribute('data-target', newValue);
+            // Re-animate the count-up
+            animateCountUp(element, newValue);
+        }
+    }
+}
+
+// ==================== COUNT UP ANIMATION HELPER ====================
+function animateCountUp(element, target) {
+    let current = 0;
+    const duration = 2000; // 2 seconds
+    const increment = target / (duration / 50);
+
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            current = target;
+            clearInterval(timer);
+        }
+        element.textContent = Math.floor(current).toLocaleString();
+    }, 50);
 }
 
 // ==================== TOOLTIPS ====================
@@ -405,18 +473,7 @@ function initDropdowns() {
     });
 }
 
-// ==================== MOBILE MENU ====================
-function initMobileMenu() {
-    const mobileToggle = document.getElementById('mobile-menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
-    
-    if (mobileToggle && mobileMenu) {
-        mobileToggle.addEventListener('click', function() {
-            mobileMenu.classList.toggle('show');
-            this.classList.toggle('active');
-        });
-    }
-}
+
 
 // ==================== SCROLL EFFECTS ====================
 function initScrollEffects() {
@@ -650,10 +707,12 @@ document.addEventListener('keydown', function(e) {
 // ==================== PERFORMANCE MONITORING ====================
 window.addEventListener('load', function() {
     // Performance metrics
-    if (window.performance) {
+    if (window.performance && window.performance.timing) {
         const perfData = window.performance.timing;
         const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-        console.log(`📊 Page Load Time: ${pageLoadTime}ms`);
+        if (pageLoadTime > 0) {
+            console.log(`📊 Page Load Time: ${pageLoadTime}ms`);
+        }
     }
 });
 
@@ -661,6 +720,54 @@ window.addEventListener('load', function() {
 window.addEventListener('error', function(e) {
     console.error('❌ Error:', e.message);
 });
+
+// ==================== MOBILE MENU ====================
+function initMobileMenu() {
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const navbarMenu = document.getElementById('navbar-menu');
+
+    if (mobileMenuToggle && navbarMenu) {
+        mobileMenuToggle.addEventListener('click', function(event) {
+            navbarMenu.classList.toggle('show');
+
+            // Animate hamburger icon
+            const icon = this.querySelector('i');
+            if (icon) {
+                if (navbarMenu.classList.contains('show')) {
+                    icon.className = 'fas fa-times';
+                } else {
+                    icon.className = 'fas fa-bars';
+                }
+            }
+
+            // Prevent event bubbling
+            event.stopPropagation();
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!mobileMenuToggle.contains(event.target) && !navbarMenu.contains(event.target)) {
+                navbarMenu.classList.remove('show');
+                const icon = mobileMenuToggle.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-bars';
+                }
+            }
+        });
+
+        // Add close button functionality
+        const closeBtn = document.getElementById('menu-close-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                navbarMenu.classList.remove('show');
+                const icon = mobileMenuToggle.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-bars';
+                }
+            });
+        }
+    }
+}
 
 // ==================== EXPORT FUNCTIONS ====================
 window.FreelanceHub = {

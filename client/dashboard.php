@@ -171,9 +171,9 @@ try {
                                 <div style="padding: 1rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
                                     <div style="flex: 1;">
                                         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-                                            <?php if ($order['profile_pic']): ?>
-                                                <img src="/uploads/profiles/<?php echo htmlspecialchars($order['profile_pic']); ?>" 
-                                                     alt="<?php echo htmlspecialchars($order['freelancer_name']); ?>" 
+                                        <?php if ($order['profile_pic']): ?>
+                                                <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($order['profile_pic']); ?>"
+                                                     alt="<?php echo htmlspecialchars($order['freelancer_name']); ?>"
                                                      class="profile-image">
                                             <?php else: ?>
                                                 <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
@@ -211,7 +211,7 @@ try {
                                             </span>
                                         </div>
                                     </div>
-                                    <a href="/client/order-details.php?id=<?php echo $order['id']; ?>" class="btn btn-primary btn-sm">
+                                    <a href="<?php echo BASE_PATH; ?>/client/order-details.php?id=<?php echo $order['id']; ?>" class="btn btn-primary btn-sm">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </div>
@@ -220,7 +220,7 @@ try {
                             <div class="text-center" style="padding: 2rem;">
                                 <i class="fas fa-shopping-cart" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
                                 <p style="color: var(--text-secondary);">No orders yet. Start by browsing gigs!</p>
-                                <a href="/browse-gigs.php" class="btn btn-primary">
+                                <a href="<?php echo BASE_PATH; ?>/browse-gigs.php" class="btn btn-primary">
                                     <i class="fas fa-search"></i> Browse Gigs
                                 </a>
                             </div>
@@ -228,7 +228,7 @@ try {
                     </div>
                     <?php if (count($recent_orders) > 0): ?>
                         <div class="card-footer">
-                            <a href="/client/orders.php" class="btn btn-primary">
+                            <a href="<?php echo BASE_PATH; ?>/client/orders.php" class="btn btn-primary">
                                 View All Orders
                             </a>
                         </div>

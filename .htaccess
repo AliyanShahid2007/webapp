@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# Handle PHP files in subdirectories
+<Files *.php>
+    SetHandler application/x-httpd-php
+</Files>
+
+# Redirect all requests to index.php if file doesn't exist (for SPA routing)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.php [L]

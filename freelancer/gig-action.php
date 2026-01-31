@@ -49,6 +49,10 @@ try {
             break;
             
         case 'activate':
+            // Check if gig was deactivated by admin
+            if ($gig['deactivated_by_admin']) {
+                redirectWithMessage('/freelancer/gigs.php', 'This gig was deactivated by an admin and cannot be reactivated', 'danger');
+            }
             $stmt = $pdo->prepare("UPDATE gigs SET status = 'active' WHERE id = ?");
             $stmt->execute([$gig_id]);
             redirectWithMessage('/freelancer/gigs.php', 'Gig activated successfully', 'success');

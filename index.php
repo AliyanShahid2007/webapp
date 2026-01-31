@@ -4,46 +4,47 @@ require_once 'includes/header.php';
 
 // Get categories
 try {
-    $pdo = getPDOConnection();
-    $stmt = $pdo->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name");
-    $categories = $stmt->fetchAll();
-    
+    $conn = getDBConnection();
+    $result = $conn->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name");
+    $categories = $result->fetch_all(MYSQLI_ASSOC);
+
     // Get top freelancers
-    $stmt = $pdo->query("
-        SELECT u.id, u.name, u.username, fp.profile_pic, fp.category, fp.rating, fp.total_reviews 
-        FROM users u 
-        JOIN freelancer_profiles fp ON u.id = fp.user_id 
-        WHERE u.status = 'active' 
-        ORDER BY fp.rating DESC, fp.total_reviews DESC 
+    $result = $conn->query("
+        SELECT u.id, u.name, u.username, fp.profile_pic, fp.category, fp.rating, fp.total_reviews
+        FROM users u
+        JOIN freelancer_profiles fp ON u.id = fp.user_id
+        WHERE u.status = 'active'
+        ORDER BY fp.rating DESC, fp.total_reviews DESC
         LIMIT 6
     ");
-    $top_freelancers = $stmt->fetchAll();
-    
+    $top_freelancers = $result->fetch_all(MYSQLI_ASSOC);
+
     // Get recent gigs
-    $stmt = $pdo->query("
-        SELECT g.*, u.name as freelancer_name, u.username, fp.profile_pic, fp.rating 
-        FROM gigs g 
-        JOIN users u ON g.freelancer_id = u.id 
-        JOIN freelancer_profiles fp ON u.id = fp.user_id 
-        WHERE g.status = 'active' AND u.status = 'active' 
-        ORDER BY g.created_at DESC 
+    $result = $conn->query("
+        SELECT g.*, u.name as freelancer_name, u.username, fp.profile_pic, fp.rating
+        FROM gigs g
+        JOIN users u ON g.freelancer_id = u.id
+        JOIN freelancer_profiles fp ON u.id = fp.user_id
+        WHERE g.status = 'active' AND u.status = 'active'
+        ORDER BY g.created_at DESC
         LIMIT 6
     ");
-    $recent_gigs = $stmt->fetchAll();
-    
+    $recent_gigs = $result->fetch_all(MYSQLI_ASSOC);
+
     // Get platform statistics
-    $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'freelancer' AND status = 'active'");
-    $total_freelancers = $stmt->fetchColumn();
-    
-    $stmt = $pdo->query("SELECT COUNT(*) FROM gigs WHERE status = 'active'");
-    $total_gigs = $stmt->fetchColumn();
-    
-    $stmt = $pdo->query("SELECT COUNT(*) FROM orders WHERE status = 'completed'");
-    $completed_orders = $stmt->fetchColumn();
-    
-    $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'client' AND status = 'active'");
-    $total_clients = $stmt->fetchColumn();
-    
+    $result = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'freelancer' AND status = 'active'");
+    $total_freelancers = $result->fetch_row()[0];
+
+    $result = $conn->query("SELECT COUNT(*) FROM gigs WHERE status = 'active'");
+    $total_gigs = $result->fetch_row()[0];
+
+    $result = $conn->query("SELECT COUNT(*) FROM orders WHERE status = 'completed'");
+    $completed_orders = $result->fetch_row()[0];
+
+    $result = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'client' AND status = 'active'");
+    $total_clients = $result->fetch_row()[0];
+
+    $conn->close();
 } catch (Exception $e) {
     error_log($e->getMessage());
     $categories = [];
@@ -76,20 +77,20 @@ try {
                 </p>
                 
                 <!-- Search Bar -->
-                <div class="search-box animate-slide-up mb-4" style="background: rgba(255,255,255,0.95); border-radius: 50px; padding: 0.5rem; display: flex; align-items: center; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-                    <input type="text" placeholder="Search for services..." 
+                <form method="GET" action="<?php echo $base_path; ?>/browse-gigs.php" class="search-box animate-slide-up mb-4" style="background: rgba(255,255,255,0.95); border-radius: 50px; padding: 0.5rem; display: flex; align-items: center; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    <input type="text" name="search" placeholder="Search for services..."
                            style="flex: 1; border: none; padding: 0.75rem 1.5rem; background: transparent; color: var(--text-primary); font-size: 1rem; outline: none;">
-                    <button class="btn btn-primary" style="border-radius: 50px; padding: 0.75rem 2rem;">
+                    <button type="submit" class="btn btn-primary" style="border-radius: 50px; padding: 0.75rem 2rem;">
                         <i class="fas fa-search"></i> Search
                     </button>
-                </div>
+                </form>
                 
                 <div class="animate-slide-up" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                     <?php if (!isLoggedIn()): ?>
-                        <a href="/register.php" class="btn btn-lg btn-hover-lift" style="background: white; color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                        <a href="<?php echo $base_path; ?>/register.php" class="btn btn-lg btn-hover-lift" style="background: white; color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                             <i class="fas fa-user-plus"></i> Get Started Free
                         </a>
-                        <a href="/browse-gigs.php" class="btn btn-lg btn-outline btn-hover-lift" style="border: 2px solid white; color: white; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                        <a href="<?php echo $base_path; ?>/browse-gigs.php" class="btn btn-lg btn-outline btn-hover-lift" style="border: 2px solid white; color: white; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
                             <i class="fas fa-search"></i> Browse Gigs
                         </a>
                     <?php else: ?>
@@ -116,7 +117,7 @@ try {
                 <div class="stat-icon mb-3">
                     <i class="fas fa-users fa-3x" style="color: var(--primary-color);"></i>
                 </div>
-                <h3 class="count-up mb-2" data-target="<?php echo $total_freelancers; ?>" style="font-weight: 700; color: var(--text-primary);">0</h3>
+                <h3 class="count-up mb-2" data-target="<?php echo $total_freelancers; ?>" data-stat="total_freelancers" style="font-weight: 700; color: var(--text-primary);">0</h3>
                 <p class="text-muted">Active Freelancers</p>
             </div>
         </div>
@@ -125,7 +126,7 @@ try {
                 <div class="stat-icon mb-3">
                     <i class="fas fa-briefcase fa-3x" style="color: var(--success-color);"></i>
                 </div>
-                <h3 class="count-up mb-2" data-target="<?php echo $total_gigs; ?>" style="font-weight: 700; color: var(--text-primary);">0</h3>
+                <h3 class="count-up mb-2" data-target="<?php echo $total_gigs; ?>" data-stat="total_gigs" style="font-weight: 700; color: var(--text-primary);">0</h3>
                 <p class="text-muted">Available Gigs</p>
             </div>
         </div>
@@ -134,7 +135,7 @@ try {
                 <div class="stat-icon mb-3">
                     <i class="fas fa-check-circle fa-3x" style="color: var(--info-color);"></i>
                 </div>
-                <h3 class="count-up mb-2" data-target="<?php echo $completed_orders; ?>" style="font-weight: 700; color: var(--text-primary);">0</h3>
+                <h3 class="count-up mb-2" data-target="<?php echo $completed_orders; ?>" data-stat="completed_orders" style="font-weight: 700; color: var(--text-primary);">0</h3>
                 <p class="text-muted">Completed Orders</p>
             </div>
         </div>
@@ -143,7 +144,7 @@ try {
                 <div class="stat-icon mb-3">
                     <i class="fas fa-handshake fa-3x" style="color: var(--warning-color);"></i>
                 </div>
-                <h3 class="count-up mb-2" data-target="<?php echo $total_clients; ?>" style="font-weight: 700; color: var(--text-primary);">0</h3>
+                <h3 class="count-up mb-2" data-target="<?php echo $total_clients; ?>" data-stat="total_clients" style="font-weight: 700; color: var(--text-primary);">0</h3>
                 <p class="text-muted">Happy Clients</p>
             </div>
         </div>
@@ -160,10 +161,10 @@ try {
     <div class="row">
         <?php foreach ($categories as $category): ?>
             <div class="col-md-3 col-sm-6 mb-3">
-                <a href="/browse-gigs.php?category=<?php echo urlencode($category['name']); ?>" style="text-decoration: none;">
+                <a href="<?php echo $base_path; ?>/browse-gigs.php?category=<?php echo urlencode($category['name']); ?>" style="text-decoration: none;">
                     <div class="card text-center" style="height: 100%; transition: var(--transition);">
                         <div class="card-body">
-                            <i class="fas <?php echo htmlspecialchars($category['icon']); ?>" 
+                            <i class="fas <?php echo htmlspecialchars($category['icon']); ?>"
                                style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
                             <h5 style="color: var(--text-primary);">
                                 <?php echo htmlspecialchars($category['name']); ?>
@@ -194,10 +195,10 @@ try {
             <div class="col-md-4 col-sm-6 mb-3">
                 <div class="card gig-card animate-on-scroll">
                     <div class="card-body">
-                        <a href="/freelancer-profile.php?id=<?php echo $gig['freelancer_id']; ?>" class="text-decoration-none" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                        <a href="<?php echo $base_path; ?>/freelancer-profile.php?id=<?php echo $gig['freelancer_id']; ?>" class="text-decoration-none" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
                             <?php if ($gig['profile_pic']): ?>
-                                <img src="/uploads/profiles/<?php echo htmlspecialchars($gig['profile_pic']); ?>" 
-                                     alt="<?php echo htmlspecialchars($gig['freelancer_name']); ?>" 
+                                <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($gig['profile_pic']); ?>"
+                                     alt="<?php echo htmlspecialchars($gig['freelancer_name']); ?>"
                                      class="profile-image">
                             <?php else: ?>
                                 <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
@@ -218,7 +219,7 @@ try {
                         </a>
                         
                         <h5 class="gig-title">
-                            <a href="/gig-details.php?id=<?php echo $gig['id']; ?>" class="text-decoration-none text-dark">
+                            <a href="<?php echo $base_path; ?>/gig-details.php?id=<?php echo $gig['id']; ?>" class="text-decoration-none text-dark">
                                 <?php echo htmlspecialchars($gig['title']); ?>
                             </a>
                         </h5>
@@ -231,7 +232,7 @@ try {
                             <div class="gig-price">
                                 $<?php echo number_format($gig['budget'], 2); ?>
                             </div>
-                            <a href="/gig-details.php?id=<?php echo $gig['id']; ?>" class="btn btn-primary btn-sm btn-hover-lift">
+                            <a href="<?php echo $base_path; ?>/gig-details.php?id=<?php echo $gig['id']; ?>" class="btn btn-primary btn-sm btn-hover-lift">
                                 View Details
                             </a>
                         </div>
@@ -242,7 +243,7 @@ try {
     </div>
     
     <div class="text-center mt-4 animate-on-scroll">
-        <a href="/browse-gigs.php" class="btn btn-primary btn-lg btn-hover-lift">
+        <a href="<?php echo $base_path; ?>/browse-gigs.php" class="btn btn-primary btn-lg btn-hover-lift">
             <i class="fas fa-search"></i> Browse All Gigs
         </a>
     </div>
@@ -264,28 +265,28 @@ try {
             <div class="col-md-4 col-sm-6 mb-3">
                 <div class="card text-center animate-on-scroll card-hover" style="border-radius: 15px; overflow: hidden;">
                     <div class="card-body p-4">
-                        <a href="/freelancer-profile.php?id=<?php echo $freelancer['id']; ?>" class="text-decoration-none">
+                        <a href="<?php echo $base_path; ?>/freelancer-profile.php?id=<?php echo $freelancer['id']; ?>" class="text-decoration-none">
                             <?php if ($freelancer['profile_pic']): ?>
-                                <img src="/uploads/profiles/<?php echo htmlspecialchars($freelancer['profile_pic']); ?>" 
-                                     alt="<?php echo htmlspecialchars($freelancer['name']); ?>" 
-                                     class="profile-image profile-image-lg" 
-                                     style="margin-bottom: 1rem; border: 4px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($freelancer['profile_pic']); ?>"
+                                     alt="<?php echo htmlspecialchars($freelancer['name']); ?>"
+                                     class="profile-image profile-image-lg"
+                                     style="display: block; margin: 0 auto 1rem; border: 4px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                             <?php else: ?>
                                 <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: 600; margin: 0 auto 1rem; border: 4px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                                     <?php echo strtoupper(substr($freelancer['name'], 0, 1)); ?>
                                 </div>
                             <?php endif; ?>
-                            
+
                             <h5 style="color: var(--text-primary); font-weight: 600; margin-bottom: 0.5rem;">
                                 <?php echo htmlspecialchars($freelancer['name']); ?>
                             </h5>
                         </a>
-                        
+
                         <p style="color: var(--text-secondary); margin-bottom: 1rem;">
                             <i class="fas fa-tag me-1"></i>
                             <?php echo htmlspecialchars($freelancer['category'] ?? 'Freelancer'); ?>
                         </p>
-                        
+
                         <div class="rating" style="justify-content: center; margin-bottom: 1.5rem;">
                             <?php for ($i = 1; $i <= 5; $i++): ?>
                                 <i class="fas fa-star <?php echo $i <= $freelancer['rating'] ? 'star' : 'text-muted'; ?>"></i>
@@ -299,8 +300,8 @@ try {
                                 </span>
                             </div>
                         </div>
-                        
-                        <a href="/freelancer-profile.php?id=<?php echo $freelancer['id']; ?>" class="btn btn-outline-primary btn-sm btn-hover-lift w-100">
+
+                        <a href="<?php echo $base_path; ?>/freelancer-profile.php?id=<?php echo $freelancer['id']; ?>" class="btn btn-outline-primary btn-sm btn-hover-lift w-100">
                             <i class="fas fa-eye me-1"></i> View Profile
                         </a>
                     </div>
@@ -375,15 +376,15 @@ try {
             </p>
             <?php if (!isLoggedIn()): ?>
                 <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <a href="/register.php?role=freelancer" class="btn btn-lg btn-hover-lift" style="background: white; color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <a href="<?php echo $base_path; ?>/register.php?role=freelancer" class="btn btn-lg btn-hover-lift" style="background: white; color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                         <i class="fas fa-user-tie me-2"></i> Join as Freelancer
                     </a>
-                    <a href="/register.php?role=client" class="btn btn-lg btn-hover-lift" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; backdrop-filter: blur(10px);">
+                    <a href="<?php echo $base_path; ?>/register.php?role=client" class="btn btn-lg btn-hover-lift" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; backdrop-filter: blur(10px);">
                         <i class="fas fa-user-plus me-2"></i> Join as Client
                     </a>
                 </div>
             <?php else: ?>
-                <a href="/browse-gigs.php" class="btn btn-lg btn-hover-lift" style="background: white; color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <a href="<?php echo $base_path; ?>/browse-gigs.php" class="btn btn-lg btn-hover-lift" style="background: white; color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                     <i class="fas fa-search me-2"></i> Start Browsing
                 </a>
             <?php endif; ?>

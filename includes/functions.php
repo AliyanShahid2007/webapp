@@ -36,7 +36,7 @@ function hasRole($role) {
 // Redirect to login if not authenticated
 function requireLogin() {
     if (!isLoggedIn()) {
-        header('Location: /login.php');
+        header('Location: ' . BASE_PATH . '/login.php');
         exit;
     }
 }
@@ -44,19 +44,19 @@ function requireLogin() {
 // Redirect to dashboard based on role
 function redirectToDashboard() {
     $role = getCurrentUserRole();
-    
+
     switch ($role) {
         case 'admin':
-            header('Location: /admin/dashboard.php');
+            header('Location: ' . BASE_PATH . '/admin/dashboard.php');
             break;
         case 'freelancer':
-            header('Location: /freelancer/dashboard.php');
+            header('Location: ' . BASE_PATH . '/freelancer/dashboard.php');
             break;
         case 'client':
-            header('Location: /client/dashboard.php');
+            header('Location: ' . BASE_PATH . '/client/dashboard.php');
             break;
         default:
-            header('Location: /index.php');
+            header('Location: ' . BASE_PATH . '/index.php');
     }
     exit;
 }
@@ -224,7 +224,7 @@ function redirectWithMessage($url, $message, $type = 'success') {
     initSession();
     $_SESSION['flash_message'] = $message;
     $_SESSION['flash_type'] = $type;
-    header("Location: $url");
+    header("Location: " . BASE_PATH . $url);
     exit;
 }
 

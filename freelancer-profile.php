@@ -2,12 +2,15 @@
 $page_title = 'Freelancer Profile';
 require_once 'includes/header.php';
 
+// Get database connection
+$pdo = getPDOConnection();
+
 // Get freelancer ID from URL
 $freelancer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($freelancer_id == 0) {
     setFlashMessage('Invalid freelancer ID', 'error');
-    header('Location: /browse-gigs.php');
+    header('Location: ' . $base_path . '/browse-gigs.php');
     exit;
 }
 
@@ -49,11 +52,11 @@ $total_orders = $stats['total_orders'] ?? 0;
             <div class="card shadow-sm animate-on-scroll">
                 <div class="card-body text-center">
                     <!-- Profile Picture -->
-                    <div class="profile-picture-large mb-3">
+                    <div class="profile-picture-large mb-3 d-flex justify-content-center">
                         <?php if ($profile && $profile['profile_pic']): ?>
-                            <img src="/uploads/profiles/<?php echo htmlspecialchars($profile['profile_pic']); ?>" 
-                                 alt="<?php echo htmlspecialchars($freelancer['name']); ?>" 
-                                 class="rounded-circle img-fluid" 
+                            <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($profile['profile_pic']); ?>"
+                                 alt="<?php echo htmlspecialchars($freelancer['name']); ?>"
+                                 class="rounded-circle img-fluid"
                                  style="width: 150px; height: 150px; object-fit: cover;">
                         <?php else: ?>
                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" 
@@ -184,7 +187,7 @@ $total_orders = $stats['total_orders'] ?? 0;
                                 <div class="card h-100 border card-hover">
                                     <div class="card-body">
                                         <h6 class="card-title">
-                                            <a href="/gig-details.php?id=<?php echo $gig['id']; ?>" class="text-decoration-none text-dark">
+                                            <a href="<?php echo $base_path; ?>/gig-details.php?id=<?php echo $gig['id']; ?>" class="text-decoration-none text-dark">
                                                 <?php echo htmlspecialchars($gig['title']); ?>
                                             </a>
                                         </h6>
@@ -201,8 +204,10 @@ $total_orders = $stats['total_orders'] ?? 0;
                                                 <?php echo $gig['delivery_time']; ?> days delivery
                                             </small>
                                         </div>
-                                        <a href="/gig-details.php?id=<?php echo $gig['id']; ?>" class="btn btn-sm btn-outline-primary mt-2 w-100">
+                                        <a href="<?php echo $base_path; ?>/gig-details.php?id=<?php echo $gig['id']; ?>" class="btn btn-sm btn-outline-primary mt-2 w-100">
                                             View Details
+                                        
+
                                         </a>
                                     </div>
                                 </div>
@@ -252,6 +257,31 @@ $total_orders = $stats['total_orders'] ?? 0;
 .card-hover:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Dark mode text visibility fixes */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .card h3,
+html[data-theme="dark"] .card p,
+html[data-theme="dark"] .card small,
+html[data-theme="dark"] .card span,
+html[data-theme="dark"] .badge {
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .card h5,
+html[data-theme="dark"] .card-header h5 {
+    color: #000000 !important;
+}
+
+html[data-theme="dark"] .badge.bg-light {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+    border-color: #4b5563 !important;
+}
+
+html[data-theme="dark"] .text-muted {
+    color: #cccccc !important;
 }
 </style>
 

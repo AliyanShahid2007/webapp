@@ -201,11 +201,11 @@ try {
                             </td>
                             <td><?php echo timeAgo($user['created_at']); ?></td>
                             <td>
-                                <a href="/admin/user-action.php?action=approve&id=<?php echo $user['id']; ?>" 
+                                <a href="<?php echo $base_path; ?>/admin/user-action.php?action=approve&id=<?php echo $user['id']; ?>"
                                    class="btn btn-success btn-sm" data-confirm="Approve this user?">
                                     <i class="fas fa-check"></i> Approve
                                 </a>
-                                <a href="/admin/user-action.php?action=reject&id=<?php echo $user['id']; ?>" 
+                                <a href="<?php echo $base_path; ?>/admin/user-action.php?action=reject&id=<?php echo $user['id']; ?>"
                                    class="btn btn-danger btn-sm" data-confirm="Reject this user?">
                                     <i class="fas fa-times"></i> Reject
                                 </a>
@@ -217,7 +217,7 @@ try {
             </div>
         </div>
         <div class="card-footer">
-            <a href="/admin/users.php?status=pending" class="btn btn-primary">
+            <a href="<?php echo $base_path; ?>/admin/users.php?status=pending" class="btn btn-primary">
                 View All Pending Users
             </a>
         </div>
@@ -277,7 +277,7 @@ try {
             </div>
         </div>
         <div class="card-footer">
-            <a href="/admin/orders.php" class="btn btn-primary">
+            <a href="<?php echo $base_path; ?>/admin/orders.php" class="btn btn-primary">
                 View All Orders
             </a>
         </div>
@@ -293,16 +293,16 @@ try {
         </div>
         <div class="card-body">
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="/admin/users.php" class="btn btn-primary">
+                <a href="<?php echo $base_path; ?>/admin/users.php" class="btn btn-primary">
                     <i class="fas fa-users"></i> Manage Users
                 </a>
-                <a href="/admin/gigs.php" class="btn btn-primary">
+                <a href="<?php echo $base_path; ?>/admin/gigs.php" class="btn btn-primary">
                     <i class="fas fa-briefcase"></i> Manage Gigs
                 </a>
-                <a href="/admin/orders.php" class="btn btn-primary">
+                <a href="<?php echo $base_path; ?>/admin/orders.php" class="btn btn-primary">
                     <i class="fas fa-shopping-cart"></i> Manage Orders
                 </a>
-                <a href="/admin/categories.php" class="btn btn-primary">
+                <a href="<?php echo $base_path; ?>/admin/categories.php" class="btn btn-primary">
                     <i class="fas fa-tags"></i> Manage Categories
                 </a>
             </div>

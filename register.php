@@ -183,8 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         
                         <div class="text-center">
                             <p style="color: var(--text-secondary);">
-                                Already have an account? 
-                                <a href="/login.php" style="color: var(--primary-color); font-weight: 600;">Login</a>
+                                Already have an account?
+                                <a href="<?php echo $base_path; ?>/login.php" style="color: var(--primary-color); font-weight: 600;">Login</a>
                             </p>
                         </div>
                     <?php endif; ?>

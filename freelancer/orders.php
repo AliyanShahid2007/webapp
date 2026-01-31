@@ -60,14 +60,14 @@ try {
     <div class="card mb-4">
         <div class="card-body">
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <a href="/freelancer/orders.php" 
+                <a href="<?php echo BASE_PATH; ?>/freelancer/orders.php"
                    class="btn <?php echo !$status_filter ? 'btn-primary' : 'btn-outline'; ?>">
                     <i class="fas fa-list"></i> All Orders
                     <span class="badge" style="background: var(--bg-tertiary); color: var(--text-primary); margin-left: 0.5rem;">
                         <?php echo array_sum($status_counts); ?>
                     </span>
                 </a>
-                <a href="/freelancer/orders.php?status=pending" 
+                <a href="<?php echo BASE_PATH; ?>/freelancer/orders.php?status=pending"
                    class="btn <?php echo $status_filter == 'pending' ? 'btn-warning' : 'btn-outline'; ?>">
                     <i class="fas fa-clock"></i> Pending
                     <?php if (isset($status_counts['pending'])): ?>
@@ -76,7 +76,7 @@ try {
                         </span>
                     <?php endif; ?>
                 </a>
-                <a href="/freelancer/orders.php?status=in_progress" 
+                <a href="<?php echo BASE_PATH; ?>/freelancer/orders.php?status=in_progress"
                    class="btn <?php echo $status_filter == 'in_progress' ? 'btn-primary' : 'btn-outline'; ?>">
                     <i class="fas fa-spinner"></i> In Progress
                     <?php if (isset($status_counts['in_progress'])): ?>
@@ -85,7 +85,7 @@ try {
                         </span>
                     <?php endif; ?>
                 </a>
-                <a href="/freelancer/orders.php?status=completed" 
+                <a href="<?php echo BASE_PATH; ?>/freelancer/orders.php?status=completed"
                    class="btn <?php echo $status_filter == 'completed' ? 'btn-success' : 'btn-outline'; ?>">
                     <i class="fas fa-check-circle"></i> Completed
                     <?php if (isset($status_counts['completed'])): ?>
@@ -173,30 +173,30 @@ try {
                                 
                                 <div class="col-md-3 text-end">
                                     <?php if ($order['status'] == 'pending'): ?>
-                                        <a href="/freelancer/order-action.php?action=accept&id=<?php echo $order['id']; ?>" 
+                                        <a href="<?php echo BASE_PATH; ?>/freelancer/order-action.php?action=accept&id=<?php echo $order['id']; ?>"
                                            class="btn btn-success btn-sm mb-1"
                                            data-confirm="Accept this order?">
                                             <i class="fas fa-check"></i> Accept
                                         </a>
-                                        <a href="/freelancer/order-action.php?action=reject&id=<?php echo $order['id']; ?>" 
+                                        <a href="<?php echo BASE_PATH; ?>/freelancer/order-action.php?action=reject&id=<?php echo $order['id']; ?>"
                                            class="btn btn-danger btn-sm mb-1"
                                            data-confirm="Reject this order?">
                                             <i class="fas fa-times"></i> Reject
                                         </a>
                                     <?php elseif ($order['status'] == 'accepted'): ?>
-                                        <a href="/freelancer/order-action.php?action=start&id=<?php echo $order['id']; ?>" 
+                                        <a href="<?php echo BASE_PATH; ?>/freelancer/order-action.php?action=start&id=<?php echo $order['id']; ?>"
                                            class="btn btn-primary btn-sm mb-1">
                                             <i class="fas fa-play"></i> Start Work
                                         </a>
                                     <?php elseif ($order['status'] == 'in_progress'): ?>
-                                        <a href="/freelancer/order-action.php?action=complete&id=<?php echo $order['id']; ?>" 
+                                        <a href="<?php echo BASE_PATH; ?>/freelancer/order-action.php?action=complete&id=<?php echo $order['id']; ?>" 
                                            class="btn btn-success btn-sm mb-1"
                                            data-confirm="Mark as completed?">
                                             <i class="fas fa-check-circle"></i> Complete
                                         </a>
                                     <?php endif; ?>
                                     <br>
-                                    <a href="/freelancer/order-details.php?id=<?php echo $order['id']; ?>" 
+                                    <a href="<?php echo BASE_PATH; ?>/freelancer/order-details.php?id=<?php echo $order['id']; ?>"
                                        class="btn btn-outline btn-sm">
                                         <i class="fas fa-eye"></i> View Details
                                     </a>
@@ -228,7 +228,7 @@ try {
                 <?php endif; ?>
             </p>
             <?php if (!$status_filter): ?>
-                <a href="/freelancer/gigs.php" class="btn btn-primary">
+                <a href="<?php echo BASE_PATH; ?>/freelancer/gigs.php" class="btn btn-primary">
                     <i class="fas fa-briefcase"></i> View My Gigs
                 </a>
             <?php endif; ?>

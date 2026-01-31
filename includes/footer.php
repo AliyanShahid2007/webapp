@@ -15,10 +15,10 @@
                 <div class="col-md-4">
                     <h6 style="color: var(--text-primary); margin-bottom: 1rem;">Quick Links</h6>
                     <ul style="list-style: none; padding: 0;">
-                        <li><a href="/browse-gigs.php" style="color: var(--text-secondary); text-decoration: none;">Browse Gigs</a></li>
-                        <li><a href="/about.php" style="color: var(--text-secondary); text-decoration: none;">About Us</a></li>
-                        <li><a href="/contact.php" style="color: var(--text-secondary); text-decoration: none;">Contact</a></li>
-                        <li><a href="/terms.php" style="color: var(--text-secondary); text-decoration: none;">Terms of Service</a></li>
+                        <li><a href="<?php echo $base_path; ?>/browse-gigs.php" style="color: var(--text-secondary); text-decoration: none;">Browse Gigs</a></li>
+                        <li><a href="<?php echo $base_path; ?>/about.php" style="color: var(--text-secondary); text-decoration: none;">About Us</a></li>
+                        <li><a href="<?php echo $base_path; ?>/contact.php" style="color: var(--text-secondary); text-decoration: none;">Contact</a></li>
+                        <li><a href="<?php echo $base_path; ?>/terms.php" style="color: var(--text-secondary); text-decoration: none;">Terms of Service</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
@@ -42,7 +42,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JS -->
-    <script src="/assets/js/main.js"></script>
+    <script src="<?php echo $base_path; ?>/assets/js/main.js"></script>
     
     <?php if (isset($extra_js)): ?>
         <?php echo $extra_js; ?>

@@ -33,7 +33,7 @@ try {
     $gig = $stmt->fetch();
     
     if (!$gig) {
-        redirectWithMessage('/browse-gigs.php', 'Gig not found', 'danger');
+        redirectWithMessage($base_path . '/browse-gigs.php', 'Gig not found', 'danger');
     }
     
     // Increment views
@@ -87,8 +87,8 @@ $page_title = $gig['title'];
                     <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--bg-tertiary); border-radius: var(--radius-md);">
                         <a href="/freelancer-profile.php?id=<?php echo $gig['freelancer_user_id']; ?>">
                             <?php if ($gig['profile_pic']): ?>
-                                <img src="/uploads/profiles/<?php echo htmlspecialchars($gig['profile_pic']); ?>" 
-                                     alt="<?php echo htmlspecialchars($gig['freelancer_name']); ?>" 
+                                <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($gig['profile_pic']); ?>"
+                                     alt="<?php echo htmlspecialchars($gig['freelancer_name']); ?>"
                                      class="profile-image profile-image-lg">
                             <?php else: ?>
                                 <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 600;">
@@ -116,7 +116,7 @@ $page_title = $gig['title'];
                                 </span>
                             </div>
                         </div>
-                        <a href="/freelancer-profile.php?id=<?php echo $gig['freelancer_user_id']; ?>" 
+                        <a href="<?php echo BASE_PATH; ?>/freelancer-profile.php?id=<?php echo $gig['freelancer_user_id']; ?>" 
                            class="btn btn-outline">
                             View Profile
                         </a>
@@ -213,7 +213,7 @@ $page_title = $gig['title'];
                                             <div style="color: var(--primary-color); font-weight: 700; font-size: 1.1rem;">
                                                 $<?php echo number_format($other_gig['budget'], 2); ?>
                                             </div>
-                                            <a href="/gig-details.php?id=<?php echo $other_gig['id']; ?>" class="btn btn-primary btn-sm">
+                                            <a href="<?php echo $base_path; ?>/gig-details.php?id=<?php echo $other_gig['id']; ?>" class="btn btn-primary btn-sm">
                                                 View
                                             </a>
                                         </div>
@@ -261,7 +261,7 @@ $page_title = $gig['title'];
                     
                     <?php if (isLoggedIn()): ?>
                         <?php if (hasRole('client')): ?>
-                            <form method="POST" action="/order-gig.php">
+                            <form method="POST" action="<?php echo $base_path; ?>/order-gig.php">
                                 <input type="hidden" name="gig_id" value="<?php echo $gig['id']; ?>">
                                 
                                 <div class="form-group">

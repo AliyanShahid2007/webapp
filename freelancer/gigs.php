@@ -32,6 +32,18 @@ try {
 }
 
 $show_create_form = isset($_GET['action']) && $_GET['action'] == 'create';
+$show_edit_form = false;
+$edit_gig = null;
+
+if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
+    $edit_id = (int)$_GET['id'];
+    $stmt = $pdo->prepare("SELECT * FROM gigs WHERE id = ? AND freelancer_id = ?");
+    $stmt->execute([$edit_id, $user_id]);
+    $edit_gig = $stmt->fetch();
+    if ($edit_gig) {
+        $show_edit_form = true;
+    }
+}
 ?>
 
 <div class="container mt-4">
@@ -46,24 +58,29 @@ $show_create_form = isset($_GET['action']) && $_GET['action'] == 'create';
         <?php endif; ?>
     </div>
     
-    <?php if ($show_create_form): ?>
-        <!-- Create Gig Form -->
+    <?php if ($show_create_form || $show_edit_form): ?>
+        <!-- Create/Edit Gig Form -->
         <div class="card mb-4">
             <div class="card-header">
                 <h4 class="card-title" style="margin-bottom: 0;">
-                    <i class="fas fa-plus"></i> Create New Gig
+                    <i class="fas fa-<?php echo $show_edit_form ? 'edit' : 'plus'; ?>"></i>
+                    <?php echo $show_edit_form ? 'Edit Gig' : 'Create New Gig'; ?>
                 </h4>
             </div>
             <div class="card-body">
-                <form method="POST" action="/freelancer/gig-action.php" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="create">
+                <form method="POST" action="<?php echo BASE_PATH; ?>/freelancer/gig-action.php" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="<?php echo $show_edit_form ? 'edit' : 'create'; ?>">
+                    <?php if ($show_edit_form): ?>
+                        <input type="hidden" name="id" value="<?php echo $edit_gig['id']; ?>">
+                    <?php endif; ?>
                     
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="title" class="form-label">Gig Title *</label>
-                                <input type="text" id="title" name="title" class="form-control" 
-                                       placeholder="I will..." required maxlength="100">
+                                <input type="text" id="title" name="title" class="form-control"
+                                       placeholder="I will..." required maxlength="100"
+                                       value="<?php echo $show_edit_form ? htmlspecialchars($edit_gig['title']) : ''; ?>">
                                 <small style="color: var(--text-muted);">
                                     Example: "I will create a professional WordPress website"
                                 </small>
@@ -76,7 +93,8 @@ $show_create_form = isset($_GET['action']) && $_GET['action'] == 'create';
                                 <select id="category" name="category" class="form-control" required>
                                     <option value="">Select category</option>
                                     <?php foreach ($categories as $cat): ?>
-                                        <option value="<?php echo htmlspecialchars($cat['name']); ?>">
+                                        <option value="<?php echo htmlspecialchars($cat['name']); ?>"
+                                                <?php echo $show_edit_form && $edit_gig['category'] == $cat['name'] ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($cat['name']); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -87,8 +105,9 @@ $show_create_form = isset($_GET['action']) && $_GET['action'] == 'create';
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="budget" class="form-label">Price ($) *</label>
-                                <input type="number" id="budget" name="budget" class="form-control" 
-                                       placeholder="50" required min="5" step="0.01">
+                                <input type="number" id="budget" name="budget" class="form-control"
+                                       placeholder="50" required min="5" step="0.01"
+                                       value="<?php echo $show_edit_form ? $edit_gig['budget'] : ''; ?>">
                             </div>
                         </div>
                         
@@ -103,18 +122,18 @@ $show_create_form = isset($_GET['action']) && $_GET['action'] == 'create';
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="description" class="form-label">Description *</label>
-                                <textarea id="description" name="description" class="form-control" rows="6" 
+                                <textarea id="description" name="description" class="form-control" rows="6"
                                           placeholder="Describe what you will do, your experience, and what clients can expect..."
-                                          required></textarea>
+                                          required><?php echo $show_edit_form ? htmlspecialchars($edit_gig['description']) : ''; ?></textarea>
                             </div>
                         </div>
                     </div>
                     
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Create Gig
+                            <i class="fas fa-save"></i> <?php echo $show_edit_form ? 'Update Gig' : 'Create Gig'; ?>
                         </button>
-                        <a href="/freelancer/gigs.php" class="btn btn-outline">
+                        <a href="<?php echo BASE_PATH; ?>/freelancer/gigs.php" class="btn btn-outline">
                             <i class="fas fa-times"></i> Cancel
                         </a>
                     </div>
@@ -151,7 +170,7 @@ $show_create_form = isset($_GET['action']) && $_GET['action'] == 'create';
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a class="dropdown-item" href="/gig-details.php?id=<?php echo $gig['id']; ?>" target="_blank">
+                                            <a class="dropdown-item" href="<?php echo BASE_PATH; ?>/gig-details.php?id=<?php echo $gig['id']; ?>" target="_blank">
                                                 <i class="fas fa-eye"></i> View
                                             </a>
                                         </li>
@@ -161,15 +180,24 @@ $show_create_form = isset($_GET['action']) && $_GET['action'] == 'create';
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="/freelancer/gig-action.php?action=<?php echo $gig['status'] == 'active' ? 'deactivate' : 'activate'; ?>&id=<?php echo $gig['id']; ?>">
-                                                <i class="fas fa-<?php echo $gig['status'] == 'active' ? 'pause' : 'play'; ?>"></i> 
-                                                <?php echo $gig['status'] == 'active' ? 'Deactivate' : 'Activate'; ?>
-                                            </a>
+                                            <?php if ($gig['status'] == 'active'): ?>
+                                                <a class="dropdown-item" href="<?php echo BASE_PATH; ?>/freelancer/gig-action.php?action=deactivate&id=<?php echo $gig['id']; ?>">
+                                                    <i class="fas fa-pause"></i> Deactivate
+                                                </a>
+                                            <?php elseif ($gig['status'] == 'inactive' && !$gig['deactivated_by_admin']): ?>
+                                                <a class="dropdown-item" href="<?php echo BASE_PATH; ?>/freelancer/gig-action.php?action=activate&id=<?php echo $gig['id']; ?>">
+                                                    <i class="fas fa-play"></i> Activate
+                                                </a>
+                                            <?php elseif ($gig['status'] == 'inactive' && $gig['deactivated_by_admin']): ?>
+                                                <span class="dropdown-item text-muted" title="This gig was deactivated by an admin">
+                                                    <i class="fas fa-lock"></i> Deactivated by Admin
+                                                </span>
+                                            <?php endif; ?>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
-                                            <a class="dropdown-item text-danger" 
-                                               href="/freelancer/gig-action.php?action=delete&id=<?php echo $gig['id']; ?>"
+                                            <a class="dropdown-item text-danger"
+                                               href="<?php echo BASE_PATH; ?>/freelancer/gig-action.php?action=delete&id=<?php echo $gig['id']; ?>"
                                                data-confirm="Are you sure you want to delete this gig?">
                                                 <i class="fas fa-trash"></i> Delete
                                             </a>

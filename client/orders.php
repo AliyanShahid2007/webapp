@@ -65,14 +65,14 @@ try {
     <div class="card mb-4">
         <div class="card-body">
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <a href="/client/orders.php" 
+                <a href="<?php echo BASE_PATH; ?>/client/orders.php" 
                    class="btn <?php echo !$status_filter ? 'btn-primary' : 'btn-outline'; ?>">
                     <i class="fas fa-list"></i> All Orders
                     <span class="badge" style="background: var(--bg-tertiary); color: var(--text-primary); margin-left: 0.5rem;">
                         <?php echo array_sum($status_counts); ?>
                     </span>
                 </a>
-                <a href="/client/orders.php?status=pending" 
+                <a href="<?php echo BASE_PATH; ?>/client/orders.php?status=pending" 
                    class="btn <?php echo $status_filter == 'pending' ? 'btn-warning' : 'btn-outline'; ?>">
                     <i class="fas fa-clock"></i> Pending
                     <?php if (isset($status_counts['pending'])): ?>
@@ -81,7 +81,7 @@ try {
                         </span>
                     <?php endif; ?>
                 </a>
-                <a href="/client/orders.php?status=in_progress" 
+                <a href="<?php echo BASE_PATH; ?>/client/orders.php?status=in_progress" 
                    class="btn <?php echo $status_filter == 'in_progress' ? 'btn-primary' : 'btn-outline'; ?>">
                     <i class="fas fa-spinner"></i> In Progress
                     <?php if (isset($status_counts['in_progress'])): ?>
@@ -90,7 +90,7 @@ try {
                         </span>
                     <?php endif; ?>
                 </a>
-                <a href="/client/orders.php?status=completed" 
+                <a href="<?php echo BASE_PATH; ?>/client/orders.php?status=completed" 
                    class="btn <?php echo $status_filter == 'completed' ? 'btn-success' : 'btn-outline'; ?>">
                     <i class="fas fa-check-circle"></i> Completed
                     <?php if (isset($status_counts['completed'])): ?>
@@ -125,8 +125,8 @@ try {
                                 <div class="col-md-5">
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                                         <?php if ($order['profile_pic']): ?>
-                                            <img src="/uploads/profiles/<?php echo htmlspecialchars($order['profile_pic']); ?>" 
-                                                 alt="<?php echo htmlspecialchars($order['freelancer_name']); ?>" 
+                                            <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($order['profile_pic']); ?>"
+                                                 alt="<?php echo htmlspecialchars($order['freelancer_name']); ?>"
                                                  class="profile-image">
                                         <?php else: ?>
                                             <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
@@ -194,13 +194,13 @@ try {
                                 </div>
                                 
                                 <div class="col-md-2 text-end">
-                                    <a href="/client/order-details.php?id=<?php echo $order['id']; ?>" 
+                                    <a href="<?php echo $base_path; ?>/client/order-details.php?id=<?php echo $order['id']; ?>" 
                                        class="btn btn-primary btn-sm mb-1">
                                         <i class="fas fa-eye"></i> View Details
                                     </a>
                                     <?php if ($order['status'] == 'completed'): ?>
                                         <br>
-                                        <a href="/client/review.php?order_id=<?php echo $order['id']; ?>" 
+                                        <a href="<?php echo $base_path; ?>/client/review.php?order_id=<?php echo $order['id']; ?>" 
                                            class="btn btn-success btn-sm">
                                             <i class="fas fa-star"></i> Leave Review
                                         </a>

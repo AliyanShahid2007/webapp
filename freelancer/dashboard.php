@@ -80,15 +80,17 @@ try {
         <div class="col-md-3 mb-4">
             <div class="card">
                 <div class="card-body text-center">
-                    <?php if ($profile['profile_pic']): ?>
-                        <img src="/uploads/profiles/<?php echo htmlspecialchars($profile['profile_pic']); ?>" 
-                             alt="<?php echo htmlspecialchars($user_data['name']); ?>" 
-                             class="profile-image profile-image-lg mb-3">
-                    <?php else: ?>
-                        <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: 600; margin: 0 auto 1rem;">
-                            <?php echo strtoupper(substr($user_data['name'], 0, 1)); ?>
-                        </div>
-                    <?php endif; ?>
+                    <div class="profile-container">
+                        <?php if ($profile['profile_pic']): ?>
+                            <img src="<?php echo BASE_PATH; ?>/uploads/profiles/<?php echo htmlspecialchars($profile['profile_pic']); ?>"
+                                 alt="<?php echo htmlspecialchars($user_data['name']); ?>"
+                                 class="profile-image profile-image-lg">
+                        <?php else: ?>
+                            <div class="profile-image profile-image-lg" style="background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: 600;">
+                                <?php echo strtoupper(substr($user_data['name'], 0, 1)); ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     
                     <h5 style="color: var(--text-primary); margin-bottom: 0.5rem;">
                         <?php echo htmlspecialchars($user_data['name']); ?>
@@ -107,10 +109,10 @@ try {
                         </span>
                     </div>
                     
-                    <a href="/freelancer/profile.php" class="btn btn-primary btn-block mb-2">
+                    <a href="<?php echo BASE_PATH; ?>/freelancer/profile.php" class="btn btn-primary btn-block mb-2">
                         <i class="fas fa-edit"></i> Edit Profile
                     </a>
-                    <a href="/freelancer-profile.php?id=<?php echo $user_id; ?>" class="btn btn-outline btn-block" target="_blank">
+                    <a href="<?php echo BASE_PATH; ?>/freelancer-profile.php?id=<?php echo $user_id; ?>" class="btn btn-outline btn-block" target="_blank">
                         <i class="fas fa-eye"></i> View Public Profile
                     </a>
                 </div>
@@ -163,13 +165,13 @@ try {
                         <i class="fas fa-link"></i> Quick Links
                     </h6>
                     <div class="d-flex flex-column gap-2">
-                        <a href="/freelancer/gigs.php" class="btn btn-sm" style="background: var(--bg-tertiary); color: var(--text-primary); text-align: left;">
+                        <a href="<?php echo BASE_PATH; ?>/freelancer/gigs.php" class="btn btn-sm" style="background: var(--bg-tertiary); color: var(--text-primary); text-align: left;">
                             <i class="fas fa-briefcase"></i> My Gigs
                         </a>
-                        <a href="/freelancer/orders.php" class="btn btn-sm" style="background: var(--bg-tertiary); color: var(--text-primary); text-align: left;">
+                        <a href="<?php echo BASE_PATH; ?>/freelancer/orders.php" class="btn btn-sm" style="background: var(--bg-tertiary); color: var(--text-primary); text-align: left;">
                             <i class="fas fa-shopping-cart"></i> Orders
                         </a>
-                        <a href="/browse-gigs.php" class="btn btn-sm" style="background: var(--bg-tertiary); color: var(--text-primary); text-align: left;">
+                        <a href="<?php echo BASE_PATH; ?>/browse-gigs.php" class="btn btn-sm" style="background: var(--bg-tertiary); color: var(--text-primary); text-align: left;">
                             <i class="fas fa-search"></i> Browse Gigs
                         </a>
                     </div>
@@ -242,13 +244,13 @@ try {
                 </div>
                 <div class="card-body">
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <a href="/freelancer/gigs.php?action=create" class="btn btn-primary">
+                        <a href="<?php echo BASE_PATH; ?>/freelancer/gigs.php?action=create" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Create New Gig
                         </a>
-                        <a href="/freelancer/profile.php" class="btn btn-secondary">
+                        <a href="<?php echo BASE_PATH; ?>/freelancer/profile.php" class="btn btn-secondary">
                             <i class="fas fa-user-edit"></i> Update Profile
                         </a>
-                        <a href="/freelancer/orders.php?status=pending" class="btn btn-warning">
+                        <a href="<?php echo BASE_PATH; ?>/freelancer/orders.php?status=pending" class="btn btn-warning">
                             <i class="fas fa-clock"></i> View Pending Orders
                         </a>
                     </div>
@@ -324,7 +326,7 @@ try {
                 <p style="color: var(--text-secondary);">
                     Start creating gigs to receive orders from clients
                 </p>
-                <a href="/freelancer/gigs.php?action=create" class="btn btn-primary">
+               <a href="<?php echo BASE_PATH; ?>/freelancer/gigs.php?action=create" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Create Your First Gig
                 </a>
             </div>

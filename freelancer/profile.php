@@ -122,8 +122,8 @@ $portfolio_images = $profile['portfolio_images'] ? json_decode($profile['portfol
                             <div style="display: flex; align-items: center; gap: 1.5rem;">
                                 <div>
                                     <?php if ($profile['profile_pic']): ?>
-                                        <img src="/uploads/profiles/<?php echo htmlspecialchars($profile['profile_pic']); ?>" 
-                                             alt="Profile" 
+                                        <img src="<?php echo BASE_PATH; ?>/uploads/profiles/<?php echo htmlspecialchars($profile['profile_pic']); ?>"
+                                             alt="Profile"
                                              id="profile-preview"
                                              class="profile-image profile-image-lg">
                                     <?php else: ?>
@@ -187,8 +187,8 @@ $portfolio_images = $profile['portfolio_images'] ? json_decode($profile['portfol
                                     <?php foreach ($portfolio_images as $index => $image): ?>
                                         <div class="col-md-4 mb-3">
                                             <div style="position: relative;">
-                                                <img src="/uploads/portfolio/<?php echo htmlspecialchars($image); ?>" 
-                                                     alt="Portfolio" 
+                                                <img src="<?php echo BASE_PATH; ?>/uploads/portfolio/<?php echo htmlspecialchars($image); ?>"
+                                                     alt="Portfolio"
                                                      style="width: 100%; height: 150px; object-fit: cover; border-radius: var(--radius-md);">
                                                 <button type="button" 
                                                         class="btn btn-danger btn-sm" 
@@ -218,7 +218,7 @@ $portfolio_images = $profile['portfolio_images'] ? json_decode($profile['portfol
                 </div>
                 
                 <div class="card-footer">
-                    <a href="/freelancer/dashboard.php" class="btn btn-outline">
+                    <a href="<?php echo BASE_PATH; ?>/freelancer/dashboard.php" class="btn btn-outline">
                         <i class="fas fa-arrow-left"></i> Back to Dashboard
                     </a>
                 </div>

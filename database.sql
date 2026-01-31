@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS gigs (
     budget DECIMAL(10,2) NOT NULL,
     delivery_time INT NOT NULL COMMENT 'in days',
     status ENUM('active', 'inactive', 'deleted') NOT NULL DEFAULT 'active',
+    deactivated_by_admin BOOLEAN DEFAULT FALSE,
     views INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -161,6 +162,40 @@ INSERT INTO categories (name, description, icon) VALUES
 -- Insert default admin user (password: admin123)
 INSERT INTO users (name, username, email, password, role, status) VALUES
 ('Admin', 'admin', 'admin@freelancehub.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'active');
+
+-- Insert sample freelancers
+INSERT INTO users (name, username, email, password, role, status) VALUES
+('John Smith', 'johnsmith', 'john@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'freelancer', 'active'),
+('Sarah Johnson', 'sarahj', 'sarah@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'freelancer', 'active'),
+('Mike Wilson', 'mikew', 'mike@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'freelancer', 'active'),
+('Emily Davis', 'emilyd', 'emily@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'freelancer', 'active'),
+('David Brown', 'davidb', 'david@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'freelancer', 'active');
+
+-- Insert freelancer profiles
+INSERT INTO freelancer_profiles (user_id, bio, category, skills, rating, total_reviews) VALUES
+(2, 'Experienced web developer specializing in modern web technologies', 'Web Development', 'HTML, CSS, JavaScript, PHP, MySQL', 4.8, 25),
+(3, 'Creative graphic designer with 5+ years of experience', 'Graphic Design', 'Photoshop, Illustrator, InDesign, Branding', 4.6, 18),
+(4, 'Mobile app developer for iOS and Android platforms', 'Mobile Apps', 'React Native, Flutter, Swift, Kotlin', 4.9, 32),
+(5, 'Professional content writer and copywriter', 'Content Writing', 'SEO Writing, Blog Posts, Technical Writing', 4.7, 15),
+(6, 'Digital marketing expert specializing in SEO and social media', 'Digital Marketing', 'SEO, Google Ads, Social Media Marketing, Analytics', 4.5, 20);
+
+-- Insert sample gigs
+INSERT INTO gigs (freelancer_id, title, description, category, budget, delivery_time, status) VALUES
+(2, 'Modern E-commerce Website', 'Complete e-commerce website with payment integration, admin panel, and responsive design', 'Web Development', 1500.00, 14, 'active'),
+(2, 'WordPress Blog Setup', 'Custom WordPress blog with theme customization and SEO optimization', 'Web Development', 800.00, 7, 'active'),
+(3, 'Logo Design Package', 'Professional logo design with multiple concepts and file formats', 'Graphic Design', 300.00, 5, 'active'),
+(3, 'Brand Identity Design', 'Complete brand identity including logo, business cards, and letterhead', 'Graphic Design', 600.00, 10, 'active'),
+(4, 'iOS Mobile App Development', 'Native iOS app development with custom features and UI/UX design', 'Mobile Apps', 2500.00, 21, 'active'),
+(4, 'Cross-platform Mobile App', 'React Native app that works on both iOS and Android platforms', 'Mobile Apps', 1800.00, 18, 'active'),
+(5, 'SEO Content Writing', 'High-quality SEO optimized articles for your blog or website', 'Content Writing', 200.00, 7, 'active'),
+(5, 'Technical Documentation', 'Comprehensive technical documentation and user manuals', 'Content Writing', 400.00, 10, 'active'),
+(6, 'SEO Optimization Service', 'Complete SEO audit and optimization for better search rankings', 'Digital Marketing', 500.00, 14, 'active'),
+(6, 'Social Media Marketing', 'Social media strategy and content creation for brand growth', 'Digital Marketing', 350.00, 30, 'active');
+
+-- Insert sample clients
+INSERT INTO users (name, username, email, password, role, status) VALUES
+('Alice Cooper', 'alicec', 'alice@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'client', 'active'),
+('Bob Martin', 'bobm', 'bob@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'client', 'active');
 
 -- Create trigger to update freelancer rating
 DELIMITER //
