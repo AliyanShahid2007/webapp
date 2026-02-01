@@ -6,44 +6,79 @@ require_once __DIR__ . '/../includes/header.php';
 requireRole('freelancer');
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Get freelancer profile
-    $stmt = $pdo->prepare("SELECT * FROM freelancer_profiles WHERE user_id = ?");
-    $stmt->execute([$user_id]);
-    $profile = $stmt->fetch();
-    
+    $stmt = $conn->prepare("SELECT * FROM freelancer_profiles WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $profile = $result->fetch_assoc();
+    $stmt->close();
+
+    // If profile doesn't exist, initialize with defaults
+    if (!$profile) {
+        $profile = [
+            'bio' => '',
+            'category' => '',
+            'skills' => '',
+            'profile_pic' => null,
+            'rating' => 0.0,
+            'total_reviews' => 0
+        ];
+    }
+
     // Get statistics
     $stats = [];
-    
+
     // Total gigs
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM gigs WHERE freelancer_id = ? AND status = 'active'");
-    $stmt->execute([$user_id]);
-    $stats['total_gigs'] = $stmt->fetch()['count'];
-    
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM gigs WHERE freelancer_id = ? AND status = 'active'");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stats['total_gigs'] = $row['count'];
+    $stmt->close();
+
     // Total orders
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM orders WHERE freelancer_id = ?");
-    $stmt->execute([$user_id]);
-    $stats['total_orders'] = $stmt->fetch()['count'];
-    
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE freelancer_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stats['total_orders'] = $row['count'];
+    $stmt->close();
+
     // Pending orders
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM orders WHERE freelancer_id = ? AND status = 'pending'");
-    $stmt->execute([$user_id]);
-    $stats['pending_orders'] = $stmt->fetch()['count'];
-    
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE freelancer_id = ? AND status = 'pending'");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stats['pending_orders'] = $row['count'];
+    $stmt->close();
+
     // Completed orders
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM orders WHERE freelancer_id = ? AND status = 'completed'");
-    $stmt->execute([$user_id]);
-    $stats['completed_orders'] = $stmt->fetch()['count'];
-    
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE freelancer_id = ? AND status = 'completed'");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stats['completed_orders'] = $row['count'];
+    $stmt->close();
+
     // Total earnings (sum of completed orders)
-    $stmt = $pdo->prepare("SELECT COALESCE(SUM(budget), 0) as total FROM orders WHERE freelancer_id = ? AND status = 'completed'");
-    $stmt->execute([$user_id]);
-    $stats['total_earnings'] = $stmt->fetch()['total'];
-    
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(budget), 0) as total FROM orders WHERE freelancer_id = ? AND status = 'completed'");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stats['total_earnings'] = $row['total'];
+    $stmt->close();
+
     // Recent orders
-    $stmt = $pdo->prepare("
-        SELECT o.*, 
+    $stmt = $conn->prepare("
+        SELECT o.*,
                g.title as gig_title,
                u.name as client_name
         FROM orders o
@@ -53,9 +88,12 @@ try {
         ORDER BY o.created_at DESC
         LIMIT 5
     ");
-    $stmt->execute([$user_id]);
-    $recent_orders = $stmt->fetchAll();
-    
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $recent_orders = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
     // Profile completeness
     $completeness = 0;
     if ($profile['bio']) $completeness += 20;
@@ -63,11 +101,13 @@ try {
     if ($profile['skills']) $completeness += 20;
     if ($profile['profile_pic']) $completeness += 20;
     if ($stats['total_gigs'] > 0) $completeness += 20;
-    
+
     // Update profile completeness
-    $stmt = $pdo->prepare("UPDATE freelancer_profiles SET profile_completeness = ? WHERE user_id = ?");
-    $stmt->execute([$completeness, $user_id]);
-    
+    $stmt = $conn->prepare("UPDATE freelancer_profiles SET profile_completeness = ? WHERE user_id = ?");
+    $stmt->bind_param("ii", $completeness, $user_id);
+    $stmt->execute();
+    $stmt->close();
+
 } catch (Exception $e) {
     error_log($e->getMessage());
     die('Error loading dashboard data');
@@ -303,7 +343,7 @@ try {
                                     </td>
                                     <td><?php echo timeAgo($order['created_at']); ?></td>
                                     <td>
-                                        <a href="/freelancer/order-details.php?id=<?php echo $order['id']; ?>" class="btn btn-primary btn-sm">
+                                        <a href="<?php echo BASE_PATH; ?>/freelancer/order-details.php?id=<?php echo $order['id']; ?>" class="btn btn-primary btn-sm">
                                             <i class="fas fa-eye"></i> View
                                         </a>
                                     </td>
@@ -314,7 +354,7 @@ try {
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a href="/freelancer/orders.php" class="btn btn-primary">
+                    <a href="<?php echo BASE_PATH?>/freelancer/orders.php" class="btn btn-primary">
                         View All Orders
                     </a>
                 </div>

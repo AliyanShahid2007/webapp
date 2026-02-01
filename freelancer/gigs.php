@@ -6,11 +6,11 @@ require_once __DIR__ . '/../includes/header.php';
 requireRole('freelancer');
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Get freelancer's gigs
-    $stmt = $pdo->prepare("
-        SELECT g.*, 
+    $stmt = $conn->prepare("
+        SELECT g.*,
                COUNT(DISTINCT o.id) as total_orders,
                COUNT(DISTINCT CASE WHEN o.status = 'pending' THEN o.id END) as pending_orders
         FROM gigs g
@@ -19,12 +19,19 @@ try {
         GROUP BY g.id
         ORDER BY g.created_at DESC
     ");
-    $stmt->execute([$user_id]);
-    $gigs = $stmt->fetchAll();
-    
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $gigs = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
     // Get categories for create form
-    $categories = $pdo->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name")->fetchAll();
-    
+    $stmt = $conn->prepare("SELECT * FROM categories WHERE status = 'active' ORDER BY name");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $categories = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
 } catch (Exception $e) {
     error_log($e->getMessage());
     $gigs = [];
@@ -37,9 +44,12 @@ $edit_gig = null;
 
 if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
     $edit_id = (int)$_GET['id'];
-    $stmt = $pdo->prepare("SELECT * FROM gigs WHERE id = ? AND freelancer_id = ?");
-    $stmt->execute([$edit_id, $user_id]);
-    $edit_gig = $stmt->fetch();
+    $stmt = $conn->prepare("SELECT * FROM gigs WHERE id = ? AND freelancer_id = ?");
+    $stmt->bind_param("ii", $edit_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $edit_gig = $result->fetch_assoc();
+    $stmt->close();
     if ($edit_gig) {
         $show_edit_form = true;
     }

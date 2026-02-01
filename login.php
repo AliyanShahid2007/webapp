@@ -17,10 +17,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = 'Please enter both username and password';
     } else {
         try {
-            $pdo = getPDOConnection();
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
-            $stmt->execute([$username, $username]);
-            $user = $stmt->fetch();
+            $conn = getDBConnection();
+            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? OR email = ?");
+            $stmt->bind_param("ss", $username, $username);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+            $stmt->close();
             
             if ($user && verifyPassword($password, $user['password'])) {
                 // Check if account is suspended
@@ -100,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="text-center">
                         <p style="color: var(--text-secondary);">
                             Don't have an account? 
-                            <a href="/register.php" style="color: var(--primary-color); font-weight: 600;">Sign Up</a>
+                            <a href="<?php echo $base_path; ?>/register.php" style="color: var(--primary-color); font-weight: 600;">Sign Up</a>
                         </p>
                     </div>
                 </div>

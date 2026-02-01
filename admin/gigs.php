@@ -11,14 +11,14 @@ if (!isLoggedIn() || getCurrentUserRole() != 'admin') {
 
 // Get gigs
 try {
-    $pdo = getPDOConnection();
-    $stmt = $pdo->query("
+    $conn = getDBConnection();
+    $result = $conn->query("
         SELECT g.*, u.name as freelancer_name
         FROM gigs g
         JOIN users u ON g.freelancer_id = u.id
         ORDER BY g.created_at DESC
     ");
-    $gigs = $stmt->fetchAll();
+    $gigs = $result->fetch_all(MYSQLI_ASSOC);
 } catch (Exception $e) {
     error_log($e->getMessage());
     $gigs = [];

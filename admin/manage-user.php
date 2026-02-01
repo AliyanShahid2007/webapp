@@ -12,12 +12,15 @@ if (!$user_id) {
 }
 
 try {
-    $pdo = getPDOConnection();
+    $conn = getDBConnection();
 
     // Get user data
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->execute([$user_id]);
-    $user = $stmt->fetch();
+    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
 
     if (!$user) {
         redirectWithMessage('/admin/dashboard.php', 'User not found', 'danger');

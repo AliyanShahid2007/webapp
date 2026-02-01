@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../includes/header.php';
+ require_once __DIR__ . '/../includes/header.php';
 
 // Check admin access
 requireRole('admin');
@@ -12,12 +12,15 @@ if (!$gig_id || !in_array($action, ['activate', 'deactivate', 'delete'])) {
 }
 
 try {
-    $pdo = getPDOConnection();
+    $conn = getDBConnection();
 
     // Get gig data
-    $stmt = $pdo->prepare("SELECT * FROM gigs WHERE id = ?");
-    $stmt->execute([$gig_id]);
-    $gig = $stmt->fetch();
+    $stmt = $conn->prepare("SELECT * FROM gigs WHERE id = ?");
+    $stmt->bind_param("i", $gig_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $gig = $result->fetch_assoc();
+    $stmt->close();
 
     if (!$gig) {
         redirectWithMessage('/admin/gigs.php', 'Gig not found', 'danger');
@@ -25,26 +28,36 @@ try {
 
     switch ($action) {
         case 'activate':
-            $stmt = $pdo->prepare("UPDATE gigs SET status = 'active' WHERE id = ?");
-            $stmt->execute([$gig_id]);
+            $stmt = $conn->prepare("UPDATE gigs SET status = 'active' WHERE id = ?");
+            $stmt->bind_param("i", $gig_id);
+            $stmt->execute();
+            $stmt->close();
             // Reset deactivated_by_admin flag separately
-            $stmt = $pdo->prepare("UPDATE gigs SET deactivated_by_admin = FALSE WHERE id = ?");
-            $stmt->execute([$gig_id]);
+            $stmt = $conn->prepare("UPDATE gigs SET deactivated_by_admin = 0 WHERE id = ?");
+            $stmt->bind_param("i", $gig_id);
+            $stmt->execute();
+            $stmt->close();
             redirectWithMessage('/admin/gigs.php', 'Gig activated successfully', 'success');
             break;
 
         case 'deactivate':
-            $stmt = $pdo->prepare("UPDATE gigs SET status = 'inactive' WHERE id = ?");
-            $stmt->execute([$gig_id]);
+            $stmt = $conn->prepare("UPDATE gigs SET status = 'inactive' WHERE id = ?");
+            $stmt->bind_param("i", $gig_id);
+            $stmt->execute();
+            $stmt->close();
             // Set deactivated_by_admin flag separately
-            $stmt = $pdo->prepare("UPDATE gigs SET deactivated_by_admin = TRUE WHERE id = ?");
-            $stmt->execute([$gig_id]);
+            $stmt = $conn->prepare("UPDATE gigs SET deactivated_by_admin = 1 WHERE id = ?");
+            $stmt->bind_param("i", $gig_id);
+            $stmt->execute();
+            $stmt->close();
             redirectWithMessage('/admin/gigs.php', 'Gig deactivated successfully', 'success');
             break;
 
         case 'delete':
-            $stmt = $pdo->prepare("UPDATE gigs SET status = 'deleted' WHERE id = ?");
-            $stmt->execute([$gig_id]);
+            $stmt = $conn->prepare("UPDATE gigs SET status = 'deleted' WHERE id = ?");
+            $stmt->bind_param("i", $gig_id);
+            $stmt->execute();
+            $stmt->close();
             redirectWithMessage('/admin/gigs.php', 'Gig deleted successfully', 'success');
             break;
     }

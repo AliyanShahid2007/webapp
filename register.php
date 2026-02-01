@@ -33,32 +33,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = 'Invalid role selected';
     } else {
         try {
-            $pdo = getPDOConnection();
-            
+            $conn = getDBConnection();
+
             // Check if username exists
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
-            $stmt->execute([$username]);
-            if ($stmt->fetch()) {
+            $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
+            $stmt->bind_param("s", $username);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->fetch_assoc()) {
                 $error = 'Username already exists';
+                $stmt->close();
             } else {
+                $stmt->close();
                 // Check if email exists
-                $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-                $stmt->execute([$email]);
-                if ($stmt->fetch()) {
+                $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+                $stmt->bind_param("s", $email);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result->fetch_assoc()) {
                     $error = 'Email already registered';
+                    $stmt->close();
                 } else {
+                    $stmt->close();
                     // Create user
                     $hashed_password = hashPassword($password);
-                    $stmt = $pdo->prepare("INSERT INTO users (name, username, email, password, role, status) VALUES (?, ?, ?, ?, ?, 'pending')");
-                    $stmt->execute([$name, $username, $email, $hashed_password, $role]);
-                    $user_id = $pdo->lastInsertId();
-                    
+                    $stmt = $conn->prepare("INSERT INTO users (name, username, email, password, role, status) VALUES (?, ?, ?, ?, ?, 'pending')");
+                    $stmt->bind_param("sssss", $name, $username, $email, $hashed_password, $role);
+                    $stmt->execute();
+                    $user_id = $conn->insert_id;
+                    $stmt->close();
+
                     // Create freelancer profile if role is freelancer
                     if ($role === 'freelancer') {
-                        $stmt = $pdo->prepare("INSERT INTO freelancer_profiles (user_id) VALUES (?)");
-                        $stmt->execute([$user_id]);
+                        $stmt = $conn->prepare("INSERT INTO freelancer_profiles (user_id) VALUES (?)");
+                        $stmt->bind_param("i", $user_id);
+                        $stmt->execute();
+                        $stmt->close();
                     }
-                    
+
                     $success = 'Registration successful! Your account is pending approval. You will be able to login once admin approves your account.';
                 }
             }
@@ -93,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <?php echo htmlspecialchars($success); ?>
                         </div>
                         <div class="text-center">
-                            <a href="/login.php" class="btn btn-primary">
+                            <a href="<?php echo $base_path?>/login.php" class="btn btn-primary">
                                 <i class="fas fa-sign-in-alt"></i> Go to Login
                             </a>
                         </div>

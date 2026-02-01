@@ -8,20 +8,22 @@ requireRole('freelancer');
 $status_filter = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Build query
     $where_clause = "o.freelancer_id = ?";
     $params = [$user_id];
-    
+    $types = "i";
+
     if ($status_filter && in_array($status_filter, ['pending', 'accepted', 'in_progress', 'completed', 'canceled'])) {
         $where_clause .= " AND o.status = ?";
         $params[] = $status_filter;
+        $types .= "s";
     }
-    
+
     // Get orders
-    $stmt = $pdo->prepare("
-        SELECT o.*, 
+    $stmt = $conn->prepare("
+        SELECT o.*,
                g.title as gig_title,
                u.name as client_name,
                u.email as client_email
@@ -31,17 +33,23 @@ try {
         WHERE $where_clause
         ORDER BY o.created_at DESC
     ");
-    $stmt->execute($params);
-    $orders = $stmt->fetchAll();
-    
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $orders = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
     // Get counts for filters
-    $stmt = $pdo->prepare("SELECT status, COUNT(*) as count FROM orders WHERE freelancer_id = ? GROUP BY status");
-    $stmt->execute([$user_id]);
+    $stmt = $conn->prepare("SELECT status, COUNT(*) as count FROM orders WHERE freelancer_id = ? GROUP BY status");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $status_counts = [];
-    foreach ($stmt->fetchAll() as $row) {
+    while ($row = $result->fetch_assoc()) {
         $status_counts[$row['status']] = $row['count'];
     }
-    
+    $stmt->close();
+
 } catch (Exception $e) {
     error_log($e->getMessage());
     $orders = [];

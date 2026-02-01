@@ -9,25 +9,44 @@ $error = '';
 $success = '';
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Get current profile
-    $stmt = $pdo->prepare("SELECT * FROM freelancer_profiles WHERE user_id = ?");
-    $stmt->execute([$user_id]);
-    $profile = $stmt->fetch();
-    
+    $stmt = $conn->prepare("SELECT * FROM freelancer_profiles WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $profile = $result->fetch_assoc();
+    $stmt->close();
+
+    // If profile doesn't exist, initialize with defaults
+    if (!$profile) {
+        $profile = [
+            'profile_pic' => null,
+            'portfolio_images' => null,
+            'bio' => '',
+            'category' => '',
+            'skills' => ''
+        ];
+    }
+
     // Get categories
-    $categories = $pdo->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name")->fetchAll();
-    
+    $stmt = $conn->prepare("SELECT * FROM categories WHERE status = 'active' ORDER BY name");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $categories = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $bio = sanitize($_POST['bio'] ?? '');
         $category = sanitize($_POST['category'] ?? '');
         $skills = sanitize($_POST['skills'] ?? '');
-        
+
         // Handle profile picture upload
         $profile_pic = $profile['profile_pic'];
         if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] == UPLOAD_ERR_OK) {
-            $upload_result = uploadFile($_FILES['profile_pic'], __DIR__ . '/../uploads/profiles');
+            $profile_pic_file = $_FILES['profile_pic'];
+            $upload_result = uploadFile($profile_pic_file, __DIR__ . '/../uploads/profiles');
             if ($upload_result['success']) {
                 // Delete old profile pic
                 if ($profile_pic && file_exists(__DIR__ . '/../uploads/profiles/' . $profile_pic)) {
@@ -38,18 +57,24 @@ try {
                 $error = $upload_result['message'];
             }
         }
-        
+
         // Handle portfolio images
         $portfolio_images = $profile['portfolio_images'] ? json_decode($profile['portfolio_images'], true) : [];
         if (isset($_FILES['portfolio']) && !empty($_FILES['portfolio']['name'][0])) {
             foreach ($_FILES['portfolio']['name'] as $key => $name) {
                 if ($_FILES['portfolio']['error'][$key] == UPLOAD_ERR_OK) {
+                    $file_name = $_FILES['portfolio']['name'][$key];
+                    $file_type = $_FILES['portfolio']['type'][$key];
+                    $file_tmp_name = $_FILES['portfolio']['tmp_name'][$key];
+                    $file_error = $_FILES['portfolio']['error'][$key];
+                    $file_size = $_FILES['portfolio']['size'][$key];
+
                     $file = [
-                        'name' => $_FILES['portfolio']['name'][$key],
-                        'type' => $_FILES['portfolio']['type'][$key],
-                        'tmp_name' => $_FILES['portfolio']['tmp_name'][$key],
-                        'error' => $_FILES['portfolio']['error'][$key],
-                        'size' => $_FILES['portfolio']['size'][$key]
+                        'name' => $file_name,
+                        'type' => $file_type,
+                        'tmp_name' => $file_tmp_name,
+                        'error' => $file_error,
+                        'size' => $file_size
                     ];
                     $upload_result = uploadFile($file, __DIR__ . '/../uploads/portfolio');
                     if ($upload_result['success']) {
@@ -58,32 +83,52 @@ try {
                 }
             }
         }
-        
+
         if (!$error) {
-            // Update profile
-            $stmt = $pdo->prepare("
-                UPDATE freelancer_profiles 
-                SET bio = ?, category = ?, skills = ?, profile_pic = ?, portfolio_images = ?
-                WHERE user_id = ?
-            ");
-            $stmt->execute([
-                $bio,
-                $category,
-                $skills,
-                $profile_pic,
-                json_encode($portfolio_images),
-                $user_id
-            ]);
-            
+            // Check if profile exists
+            $stmt = $conn->prepare("SELECT COUNT(*) FROM freelancer_profiles WHERE user_id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $exists = $row['COUNT(*)'] > 0;
+            $stmt->close();
+
+            if ($exists) {
+                // Update existing profile
+                $stmt = $conn->prepare("
+                    UPDATE freelancer_profiles
+                    SET bio = ?, category = ?, skills = ?, profile_pic = ?, portfolio_images = ?
+                    WHERE user_id = ?
+                ");
+                $portfolio_json = json_encode($portfolio_images);
+                $stmt->bind_param("sssssi", $bio, $category, $skills, $profile_pic, $portfolio_json, $user_id);
+                $stmt->execute();
+                $stmt->close();
+            } else {
+                // Insert new profile
+                $stmt = $conn->prepare("
+                    INSERT INTO freelancer_profiles (user_id, bio, category, skills, profile_pic, portfolio_images)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ");
+                $portfolio_json = json_encode($portfolio_images);
+                $stmt->bind_param("isssss", $user_id, $bio, $category, $skills, $profile_pic, $portfolio_json);
+                $stmt->execute();
+                $stmt->close();
+            }
+
             $success = 'Profile updated successfully!';
-            
+
             // Refresh profile data
-            $stmt = $pdo->prepare("SELECT * FROM freelancer_profiles WHERE user_id = ?");
-            $stmt->execute([$user_id]);
-            $profile = $stmt->fetch();
+            $stmt = $conn->prepare("SELECT * FROM freelancer_profiles WHERE user_id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $profile = $result->fetch_assoc();
+            $stmt->close();
         }
     }
-    
+
 } catch (Exception $e) {
     error_log($e->getMessage());
     $error = 'An error occurred while updating profile';

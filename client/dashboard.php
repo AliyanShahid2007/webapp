@@ -6,39 +6,54 @@ require_once __DIR__ . '/../includes/header.php';
 requireRole('client');
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Get statistics
     $stats = [];
-    
+
     // Total orders
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM orders WHERE client_id = ?");
-    $stmt->execute([$user_id]);
-    $stats['total_orders'] = $stmt->fetch()['count'];
-    
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE client_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stats['total_orders'] = $result->fetch_assoc()['count'];
+    $stmt->close();
+
     // Pending orders
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM orders WHERE client_id = ? AND status = 'pending'");
-    $stmt->execute([$user_id]);
-    $stats['pending_orders'] = $stmt->fetch()['count'];
-    
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE client_id = ? AND status = 'pending'");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stats['pending_orders'] = $result->fetch_assoc()['count'];
+    $stmt->close();
+
     // In progress orders
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM orders WHERE client_id = ? AND status IN ('accepted', 'in_progress')");
-    $stmt->execute([$user_id]);
-    $stats['in_progress'] = $stmt->fetch()['count'];
-    
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE client_id = ? AND status IN ('accepted', 'in_progress')");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stats['in_progress'] = $result->fetch_assoc()['count'];
+    $stmt->close();
+
     // Completed orders
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM orders WHERE client_id = ? AND status = 'completed'");
-    $stmt->execute([$user_id]);
-    $stats['completed_orders'] = $stmt->fetch()['count'];
-    
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM orders WHERE client_id = ? AND status = 'completed'");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stats['completed_orders'] = $result->fetch_assoc()['count'];
+    $stmt->close();
+
     // Total spent
-    $stmt = $pdo->prepare("SELECT COALESCE(SUM(budget), 0) as total FROM orders WHERE client_id = ? AND status = 'completed'");
-    $stmt->execute([$user_id]);
-    $stats['total_spent'] = $stmt->fetch()['total'];
-    
+    $stmt = $conn->prepare("SELECT COALESCE(SUM(budget), 0) as total FROM orders WHERE client_id = ? AND status = 'completed'");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stats['total_spent'] = $result->fetch_assoc()['total'];
+    $stmt->close();
+
     // Recent orders
-    $stmt = $pdo->prepare("
-        SELECT o.*, 
+    $stmt = $conn->prepare("
+        SELECT o.*,
                g.title as gig_title,
                u.name as freelancer_name,
                fp.profile_pic,
@@ -51,12 +66,15 @@ try {
         ORDER BY o.created_at DESC
         LIMIT 5
     ");
-    $stmt->execute([$user_id]);
-    $recent_orders = $stmt->fetchAll();
-    
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $recent_orders = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
     // Recommended gigs
-    $stmt = $pdo->query("
-        SELECT g.*, 
+    $result = $conn->query("
+        SELECT g.*,
                u.name as freelancer_name,
                fp.profile_pic,
                fp.rating,
@@ -68,8 +86,8 @@ try {
         ORDER BY fp.rating DESC, g.created_at DESC
         LIMIT 4
     ");
-    $recommended_gigs = $stmt->fetchAll();
-    
+    $recommended_gigs = $result->fetch_all(MYSQLI_ASSOC);
+
 } catch (Exception $e) {
     error_log($e->getMessage());
     die('Error loading dashboard data');
@@ -143,13 +161,13 @@ try {
             </div>
             <div class="card-body">
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <a href="/browse-gigs.php" class="btn btn-primary">
+                    <a href="<?php echo $base_path?>/browse-gigs.php" class="btn btn-primary">
                         <i class="fas fa-search"></i> Browse Gigs
                     </a>
-                    <a href="/client/orders.php" class="btn btn-secondary">
+                    <a href="<?php echo $base_path?>/client/orders.php" class="btn btn-secondary">
                         <i class="fas fa-shopping-cart"></i> My Orders
                     </a>
-                    <a href="/browse-gigs.php?sort=rating" class="btn btn-success">
+                    <a href="<?php echo $base_path?>/browse-gigs.php?sort=rating" class="btn btn-success">
                         <i class="fas fa-star"></i> Top Rated Gigs
                     </a>
                 </div>
@@ -266,7 +284,7 @@ try {
                                         <div style="color: var(--primary-color); font-weight: 700; font-size: 1.1rem;">
                                             $<?php echo number_format($gig['budget'], 2); ?>
                                         </div>
-                                        <a href="/gig-details.php?id=<?php echo $gig['id']; ?>" class="btn btn-primary btn-sm">
+                                        <a href="<?php echo $base_path?>/gig-details.php?id=<?php echo $gig['id']; ?>" class="btn btn-primary btn-sm">
                                             View
                                         </a>
                                     </div>
@@ -275,7 +293,7 @@ try {
                         <?php endforeach; ?>
                     </div>
                     <div class="card-footer">
-                        <a href="/browse-gigs.php" class="btn btn-primary">
+                        <a href="<?php echo $base_path?>/browse-gigs.php" class="btn btn-primary">
                             Browse All Gigs
                         </a>
                     </div>

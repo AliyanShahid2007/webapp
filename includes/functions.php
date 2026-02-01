@@ -135,7 +135,7 @@ function timeAgo($datetime) {
 }
 
 // Upload file
-function uploadFile($file, $uploadDir, $allowedTypes = ['jpg', 'jpeg', 'png', 'gif']) {
+function uploadFile(&$file, $uploadDir, $allowedTypes = ['jpg', 'jpeg', 'png', 'gif']) {
     if (!isset($file['error']) || is_array($file['error'])) {
         return ['success' => false, 'message' => 'Invalid file upload'];
     }
@@ -178,10 +178,12 @@ function deleteFile($filePath) {
 
 // Get user data by ID
 function getUserById($userId) {
-    $pdo = getPDOConnection();
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
-    return $stmt->fetch();
+    $conn = getDBConnection();
+    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_assoc();
 }
 
 // Check if account is suspended
@@ -201,9 +203,11 @@ function isAccountSuspended($userId) {
             return true;
         } else {
             // Suspension period over, reactivate account
-            $pdo = getPDOConnection();
-            $stmt = $pdo->prepare("UPDATE users SET status = 'active', suspended_until = NULL WHERE id = ?");
-            $stmt->execute([$userId]);
+            $conn = getDBConnection();
+            $stmt = $conn->prepare("UPDATE users SET status = 'active', suspended_until = NULL WHERE id = ?");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $stmt->close();
             return false;
         }
     }

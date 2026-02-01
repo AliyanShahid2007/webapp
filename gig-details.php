@@ -10,10 +10,10 @@ if (!$gig_id) {
 }
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Get gig details with freelancer info
-    $stmt = $pdo->prepare("
+    $stmt = $conn->prepare("
         SELECT g.*,
                u.id as freelancer_user_id,
                u.name as freelancer_name,
@@ -29,30 +29,38 @@ try {
         JOIN freelancer_profiles fp ON u.id = fp.user_id
         WHERE g.id = ? AND g.status = 'active' AND u.status = 'active'
     ");
-    $stmt->execute([$gig_id]);
-    $gig = $stmt->fetch();
-    
+    $stmt->bind_param("i", $gig_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $gig = $result->fetch_assoc();
+    $stmt->close();
+
     if (!$gig) {
         redirectWithMessage($base_path . '/browse-gigs.php', 'Gig not found', 'danger');
     }
-    
+
     // Increment views
-    $stmt = $pdo->prepare("UPDATE gigs SET views = views + 1 WHERE id = ?");
-    $stmt->execute([$gig_id]);
-    
+    $stmt = $conn->prepare("UPDATE gigs SET views = views + 1 WHERE id = ?");
+    $stmt->bind_param("i", $gig_id);
+    $stmt->execute();
+    $stmt->close();
+
     // Get freelancer's other gigs
-    $stmt = $pdo->prepare("
-        SELECT * FROM gigs 
+    $stmt = $conn->prepare("
+        SELECT * FROM gigs
         WHERE freelancer_id = ? AND id != ? AND status = 'active'
         ORDER BY created_at DESC
         LIMIT 3
     ");
-    $stmt->execute([$gig['freelancer_id'], $gig_id]);
-    $other_gigs = $stmt->fetchAll();
-    
+    $stmt->bind_param("ii", $gig['freelancer_id'], $gig_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $other_gigs = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
     $portfolio_images = $gig['portfolio_images'] ? json_decode($gig['portfolio_images'], true) : [];
     $skills = $gig['skills'] ? explode(',', $gig['skills']) : [];
-    
+
 } catch (Exception $e) {
     error_log($e->getMessage());
     redirectWithMessage('/browse-gigs.php', 'Error loading gig', 'danger');
@@ -284,7 +292,7 @@ $page_title = $gig['title'];
                             </div>
                         <?php endif; ?>
                     <?php else: ?>
-                        <a href="/login.php?redirect=<?php echo urlencode('/gig-details.php?id=' . $gig['id']); ?>" 
+                        <a href="<?php echo $base_path; ?>/login.php?redirect=<?php echo urlencode('/gig-details.php?id=' . $gig['id']); ?>" 
                            class="btn btn-primary btn-lg btn-block">
                             <i class="fas fa-sign-in-alt"></i> Login to Order
                         </a>

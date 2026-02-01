@@ -11,8 +11,8 @@ if (!isLoggedIn() || getCurrentUserRole() != 'admin') {
 
 // Get orders
 try {
-    $pdo = getPDOConnection();
-    $stmt = $pdo->query("
+    $conn = getDBConnection();
+    $result = $conn->query("
         SELECT o.*, u1.name as client_name, u2.name as freelancer_name, g.title as gig_title
         FROM orders o
         JOIN users u1 ON o.client_id = u1.id
@@ -20,7 +20,7 @@ try {
         JOIN gigs g ON o.gig_id = g.id
         ORDER BY o.created_at DESC
     ");
-    $orders = $stmt->fetchAll();
+    $orders = $result->fetch_all(MYSQLI_ASSOC);
 } catch (Exception $e) {
     error_log($e->getMessage());
     $orders = [];

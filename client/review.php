@@ -12,10 +12,10 @@ if (!$order_id) {
 }
 
 try {
-    $pdo = getPDOConnection();
+    $conn = getDBConnection();
 
     // Get order details and verify ownership
-    $stmt = $pdo->prepare("
+    $stmt = $conn->prepare("
         SELECT o.*,
                g.title as gig_title,
                u.name as freelancer_name,
@@ -26,8 +26,11 @@ try {
         JOIN freelancer_profiles fp ON u.id = fp.user_id
         WHERE o.id = ? AND o.client_id = ?
     ");
-    $stmt->execute([$order_id, $user_id]);
-    $order = $stmt->fetch();
+    $stmt->bind_param("ii", $order_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $order = $result->fetch_assoc();
+    $stmt->close();
 
     if (!$order) {
         redirectWithMessage('/client/orders.php', 'Order not found or access denied', 'danger');
@@ -38,9 +41,12 @@ try {
     }
 
     // Check if review already exists
-    $stmt = $pdo->prepare("SELECT id FROM reviews WHERE order_id = ?");
-    $stmt->execute([$order_id]);
-    $existing_review = $stmt->fetch();
+    $stmt = $conn->prepare("SELECT id FROM reviews WHERE order_id = ?");
+    $stmt->bind_param("i", $order_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $existing_review = $result->fetch_assoc();
+    $stmt->close();
 
     if ($existing_review) {
         redirectWithMessage('/client/orders.php', 'You have already reviewed this order', 'info');
@@ -55,11 +61,13 @@ try {
             $error = 'Please select a valid rating (1-5 stars)';
         } else {
             try {
-                $stmt = $pdo->prepare("
+                $stmt = $conn->prepare("
                     INSERT INTO reviews (order_id, freelancer_id, client_id, rating, comment)
                     VALUES (?, ?, ?, ?, ?)
                 ");
-                $stmt->execute([$order_id, $order['freelancer_id'], $user_id, $rating, $comment]);
+                $stmt->bind_param("iiiis", $order_id, $order['freelancer_id'], $user_id, $rating, $comment);
+                $stmt->execute();
+                $stmt->close();
 
                 redirectWithMessage('/client/orders.php', 'Thank you for your review!', 'success');
             } catch (Exception $e) {

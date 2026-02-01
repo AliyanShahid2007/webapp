@@ -3,7 +3,7 @@ $page_title = 'Freelancer Profile';
 require_once 'includes/header.php';
 
 // Get database connection
-$pdo = getPDOConnection();
+$conn = getDBConnection();
 
 // Get freelancer ID from URL
 $freelancer_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -15,9 +15,12 @@ if ($freelancer_id == 0) {
 }
 
 // Get freelancer user data
-$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ? AND role = 'freelancer'");
-$stmt->execute([$freelancer_id]);
-$freelancer = $stmt->fetch();
+$stmt = $conn->prepare("SELECT * FROM users WHERE id = ? AND role = 'freelancer'");
+$stmt->bind_param("i", $freelancer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$freelancer = $result->fetch_assoc();
+$stmt->close();
 
 if (!$freelancer) {
     setFlashMessage('Freelancer not found', 'error');
@@ -26,19 +29,28 @@ if (!$freelancer) {
 }
 
 // Get freelancer profile
-$stmt = $pdo->prepare("SELECT * FROM freelancer_profiles WHERE user_id = ?");
-$stmt->execute([$freelancer_id]);
-$profile = $stmt->fetch();
+$stmt = $conn->prepare("SELECT * FROM freelancer_profiles WHERE user_id = ?");
+$stmt->bind_param("i", $freelancer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$profile = $result->fetch_assoc();
+$stmt->close();
 
 // Get freelancer gigs
-$stmt = $pdo->prepare("SELECT * FROM gigs WHERE freelancer_id = ? AND status = 'active' ORDER BY created_at DESC");
-$stmt->execute([$freelancer_id]);
-$gigs = $stmt->fetchAll();
+$stmt = $conn->prepare("SELECT * FROM gigs WHERE freelancer_id = ? AND status = 'active' ORDER BY created_at DESC");
+$stmt->bind_param("i", $freelancer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$gigs = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
 // Get freelancer stats
-$stmt = $pdo->prepare("SELECT COUNT(*) as total_orders FROM orders WHERE freelancer_id = ? AND status = 'completed'");
-$stmt->execute([$freelancer_id]);
-$stats = $stmt->fetch();
+$stmt = $conn->prepare("SELECT COUNT(*) as total_orders FROM orders WHERE freelancer_id = ? AND status = 'completed'");
+$stmt->bind_param("i", $freelancer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$stats = $result->fetch_assoc();
+$stmt->close();
 
 // Calculate average rating
 $rating = $profile['rating'] ?? 0;

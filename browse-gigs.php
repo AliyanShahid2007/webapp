@@ -15,7 +15,7 @@ $per_page = 12;
 $offset = ($page - 1) * $per_page;
 
 try {
-    $pdo = getPDOConnection();
+    $conn = getDBConnection();
     
     // Build query
     $where_clauses = ["g.status = 'active'", "u.status = 'active'"];
@@ -116,106 +116,129 @@ try {
     }
     
     // Get total count
-    $count_sql = "SELECT COUNT(*) as count FROM gigs g 
-                  JOIN users u ON g.freelancer_id = u.id 
-                  JOIN freelancer_profiles fp ON u.id = fp.user_id 
+    $count_sql = "SELECT COUNT(*) as count FROM gigs g
+                  JOIN users u ON g.freelancer_id = u.id
+                  JOIN freelancer_profiles fp ON u.id = fp.user_id
                   WHERE $where_sql";
-    $count_stmt = $pdo->prepare($count_sql);
-    $count_stmt->execute($params);
-    $total_gigs = $count_stmt->fetch()['count'];
+    $count_stmt = $conn->prepare($count_sql);
+    if (!empty($params)) {
+        $types = str_repeat('s', count($params));
+        $count_stmt->bind_param($types, ...$params);
+    }
+    $count_stmt->execute();
+    $count_result = $count_stmt->get_result();
+    $total_gigs = $count_result->fetch_assoc()['count'];
+    $count_stmt->close();
     
     // Get gigs
-    $sql = "SELECT g.*, 
-            u.name as freelancer_name, 
-            u.username, 
-            fp.profile_pic, 
+    $sql = "SELECT g.*,
+            u.name as freelancer_name,
+            u.username,
+            fp.profile_pic,
             fp.rating,
             fp.total_reviews
-            FROM gigs g 
-            JOIN users u ON g.freelancer_id = u.id 
-            JOIN freelancer_profiles fp ON u.id = fp.user_id 
-            WHERE $where_sql 
-            ORDER BY $order_by 
+            FROM gigs g
+            JOIN users u ON g.freelancer_id = u.id
+            JOIN freelancer_profiles fp ON u.id = fp.user_id
+            WHERE $where_sql
+            ORDER BY $order_by
             LIMIT $per_page OFFSET $offset";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $gigs = $stmt->fetchAll();
+
+    $stmt = $conn->prepare($sql);
+    if (!empty($params)) {
+        $types = str_repeat('s', count($params));
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $gigs = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
     
     // Get freelancers if searching
     $freelancers = [];
     if ($search) {
-        $search_lower = strtolower($search);
-        $search_term = "%" . $search_lower . "%";
+        try {
+            $search_lower = strtolower($search);
+            $search_term = "%" . $search_lower . "%";
 
-        // Create multiple search terms for common variations
-        $search_terms = [$search_term];
+            // Create multiple search terms for common variations
+            $search_terms = [$search_term];
 
-        // Common misspellings and their corrections
-        $spelling_corrections = [
-            'developement' => 'development',
-            'desing' => 'design',
-            'programing' => 'programming',
-            'marketting' => 'marketing',
-            'writting' => 'writing',
-            'grafic' => 'graphic',
-            'websit' => 'website',
-            'mobil' => 'mobile',
-            'aplication' => 'app',
-            'softwere' => 'software',
-            'bussiness' => 'business',
-            'managment' => 'management',
-            'consultting' => 'consulting',
-            'fotografy' => 'photography',
-            'vidio' => 'video',
-            'editting' => 'editing',
-            'translatin' => 'translation',
-            'datta' => 'data',
-            'analisis' => 'analysis',
-            'reserch' => 'research'
-        ];
+            // Common misspellings and their corrections
+            $spelling_corrections = [
+                'developement' => 'development',
+                'desing' => 'design',
+                'programing' => 'programming',
+                'marketting' => 'marketing',
+                'writting' => 'writing',
+                'grafic' => 'graphic',
+                'websit' => 'website',
+                'mobil' => 'mobile',
+                'aplication' => 'app',
+                'softwere' => 'software',
+                'bussiness' => 'business',
+                'managment' => 'management',
+                'consultting' => 'consulting',
+                'fotografy' => 'photography',
+                'vidio' => 'video',
+                'editting' => 'editing',
+                'translatin' => 'translation',
+                'datta' => 'data',
+                'analisis' => 'analysis',
+                'reserch' => 'research'
+            ];
 
-        // Add variations for common typos (bidirectional)
-        foreach ($spelling_corrections as $misspelled => $correct) {
-            if (strpos($search_lower, $misspelled) !== false) {
-                $search_terms[] = "%" . str_replace($misspelled, $correct, $search_lower) . "%";
+            // Add variations for common typos (bidirectional)
+            foreach ($spelling_corrections as $misspelled => $correct) {
+                if (strpos($search_lower, $misspelled) !== false) {
+                    $search_terms[] = "%" . str_replace($misspelled, $correct, $search_lower) . "%";
+                }
+                if (strpos($search_lower, $correct) !== false) {
+                    $search_terms[] = "%" . str_replace($correct, $misspelled, $search_lower) . "%";
+                }
             }
-            if (strpos($search_lower, $correct) !== false) {
-                $search_terms[] = "%" . str_replace($correct, $misspelled, $search_lower) . "%";
+
+            // Add common abbreviations
+            if (strpos($search_lower, 'development') !== false) {
+                $search_terms[] = "%" . str_replace('development', 'dev', $search_lower) . "%";
             }
-        }
+            if (strpos($search_lower, 'developement') !== false) {
+                $search_terms[] = "%" . str_replace('developement', 'dev', $search_lower) . "%";
+            }
 
-        // Add common abbreviations
-        if (strpos($search_lower, 'development') !== false) {
-            $search_terms[] = "%" . str_replace('development', 'dev', $search_lower) . "%";
-        }
-        if (strpos($search_lower, 'developement') !== false) {
-            $search_terms[] = "%" . str_replace('developement', 'dev', $search_lower) . "%";
-        }
+            $freelancer_conditions = [];
+            $freelancer_params = [];
+            $types = "";
+            foreach ($search_terms as $term) {
+                $freelancer_conditions[] = "(LOWER(u.name) LIKE ? OR LOWER(fp.category) LIKE ? OR LOWER(fp.bio) LIKE ?)";
+                $freelancer_params[] = $term;
+                $freelancer_params[] = $term;
+                $freelancer_params[] = $term;
+                $types .= "sss";
+            }
 
-        $freelancer_conditions = [];
-        $freelancer_params = [];
-        foreach ($search_terms as $term) {
-            $freelancer_conditions[] = "(LOWER(u.name) LIKE ? OR LOWER(fp.category) LIKE ? OR LOWER(fp.bio) LIKE ?)";
-            $freelancer_params[] = $term;
-            $freelancer_params[] = $term;
-            $freelancer_params[] = $term;
+            $freelancer_sql = "SELECT u.id, u.name, u.username, fp.profile_pic, fp.category, fp.rating, fp.total_reviews, fp.bio
+                              FROM users u
+                              JOIN freelancer_profiles fp ON u.id = fp.user_id
+                              WHERE u.status = 'active' AND u.role = 'freelancer'
+                              AND (" . implode(' OR ', $freelancer_conditions) . ")
+                              ORDER BY fp.rating DESC, fp.total_reviews DESC
+                              LIMIT 6";
+            $freelancer_stmt = $conn->prepare($freelancer_sql);
+            $freelancer_stmt->bind_param($types, ...$freelancer_params);
+            $freelancer_stmt->execute();
+            $result = $freelancer_stmt->get_result();
+            $freelancers = $result->fetch_all(MYSQLI_ASSOC);
+            $freelancer_stmt->close();
+        } catch (Exception $e) {
+            error_log("Freelancer search error: " . $e->getMessage());
+            $freelancers = [];
         }
-
-        $freelancer_sql = "SELECT u.id, u.name, u.username, fp.profile_pic, fp.category, fp.rating, fp.total_reviews, fp.bio
-                          FROM users u
-                          JOIN freelancer_profiles fp ON u.id = fp.user_id
-                          WHERE u.status = 'active' AND u.role = 'freelancer'
-                          AND (" . implode(' OR ', $freelancer_conditions) . ")
-                          ORDER BY fp.rating DESC, fp.total_reviews DESC
-                          LIMIT 6";
-        $freelancer_stmt = $pdo->prepare($freelancer_sql);
-        $freelancer_stmt->execute($freelancer_params);
-        $freelancers = $freelancer_stmt->fetchAll();
     }
 
     // Get categories for filter
-    $categories = $pdo->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name")->fetchAll();
+    $categories_result = $conn->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name");
+    $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
 
     // Calculate pagination
     $total_pages = ceil($total_gigs / $per_page);

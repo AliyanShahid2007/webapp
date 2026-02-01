@@ -13,10 +13,10 @@ if (!$order_id) {
 }
 
 try {
-    $pdo = getPDOConnection();
+    $conn = getDBConnection();
 
     // Get order details with client ownership check
-    $stmt = $pdo->prepare("
+    $stmt = $conn->prepare("
         SELECT o.*,
                g.title as gig_title,
                g.description as gig_description,
@@ -33,8 +33,11 @@ try {
         JOIN freelancer_profiles fp ON u.id = fp.user_id
         WHERE o.id = ? AND o.client_id = ?
     ");
-    $stmt->execute([$order_id, $user_id]);
-    $order = $stmt->fetch();
+    $stmt->bind_param("ii", $order_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $order = $result->fetch_assoc();
+    $stmt->close();
 
     if (!$order) {
         // Order not found or doesn't belong to user
@@ -128,7 +131,7 @@ try {
                         </div>
                     </div>
 
-                    <?php if ($order['requirements']): ?>
+                    <?php if (isset($order['requirements']) && $order['requirements']): ?>
                         <div class="mt-3">
                             <h6 style="color: var(--text-primary);">Requirements</h6>
                             <p style="color: var(--text-secondary);">
@@ -152,7 +155,7 @@ try {
                     <?php if ($order['profile_pic']): ?>
                         <img src="<?php echo $base_path; ?>/uploads/profiles/<?php echo htmlspecialchars($order['profile_pic']); ?>"
                              alt="<?php echo htmlspecialchars($order['freelancer_name']); ?>"
-                             class="profile-image mb-3" style="width: 80px; height: 80px;">
+                             class="profile-image mb-3" style="width: 80px; height: 80px; display: block; margin: 0 auto;">
                     <?php else: ?>
                         <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-color); display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 2rem; margin-bottom: 1rem;">
                             <?php echo strtoupper(substr($order['freelancer_name'], 0, 1)); ?>
@@ -163,7 +166,7 @@ try {
                         <?php echo htmlspecialchars($order['freelancer_name']); ?>
                     </h6>
 
-                    <div class="rating mb-2">
+                    <div class="rating mb-2" style="text-align: center; justify-content: center;">
                         <i class="fas fa-star star"></i>
                         <?php echo number_format($order['rating'], 1); ?>
                     </div>

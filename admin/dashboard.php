@@ -6,50 +6,50 @@ require_once __DIR__ . '/../includes/header.php';
 requireRole('admin');
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Get statistics
     $stats = [];
-    
+
     // Total users
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM users WHERE role != 'admin'");
-    $stats['total_users'] = $stmt->fetch()['count'];
-    
+    $result = $conn->query("SELECT COUNT(*) as count FROM users WHERE role != 'admin'");
+    $stats['total_users'] = $result->fetch_assoc()['count'];
+
     // Pending approvals
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM users WHERE status = 'pending'");
-    $stats['pending_approvals'] = $stmt->fetch()['count'];
-    
+    $result = $conn->query("SELECT COUNT(*) as count FROM users WHERE status = 'pending'");
+    $stats['pending_approvals'] = $result->fetch_assoc()['count'];
+
     // Active freelancers
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM users WHERE role = 'freelancer' AND status = 'active'");
-    $stats['active_freelancers'] = $stmt->fetch()['count'];
-    
+    $result = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'freelancer' AND status = 'active'");
+    $stats['active_freelancers'] = $result->fetch_assoc()['count'];
+
     // Active clients
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM users WHERE role = 'client' AND status = 'active'");
-    $stats['active_clients'] = $stmt->fetch()['count'];
-    
+    $result = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'client' AND status = 'active'");
+    $stats['active_clients'] = $result->fetch_assoc()['count'];
+
     // Total gigs
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM gigs WHERE status = 'active'");
-    $stats['total_gigs'] = $stmt->fetch()['count'];
-    
+    $result = $conn->query("SELECT COUNT(*) as count FROM gigs WHERE status = 'active'");
+    $stats['total_gigs'] = $result->fetch_assoc()['count'];
+
     // Total orders
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM orders");
-    $stats['total_orders'] = $stmt->fetch()['count'];
-    
+    $result = $conn->query("SELECT COUNT(*) as count FROM orders");
+    $stats['total_orders'] = $result->fetch_assoc()['count'];
+
     // Pending orders
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM orders WHERE status = 'pending'");
-    $stats['pending_orders'] = $stmt->fetch()['count'];
-    
+    $result = $conn->query("SELECT COUNT(*) as count FROM orders WHERE status = 'pending'");
+    $stats['pending_orders'] = $result->fetch_assoc()['count'];
+
     // Completed orders
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM orders WHERE status = 'completed'");
-    $stats['completed_orders'] = $stmt->fetch()['count'];
-    
+    $result = $conn->query("SELECT COUNT(*) as count FROM orders WHERE status = 'completed'");
+    $stats['completed_orders'] = $result->fetch_assoc()['count'];
+
     // Recent users (pending approval)
-    $stmt = $pdo->query("SELECT * FROM users WHERE status = 'pending' ORDER BY created_at DESC LIMIT 10");
-    $pending_users = $stmt->fetchAll();
-    
+    $result = $conn->query("SELECT * FROM users WHERE status = 'pending' ORDER BY created_at DESC LIMIT 10");
+    $pending_users = $result->fetch_all(MYSQLI_ASSOC);
+
     // Recent orders
-    $stmt = $pdo->query("
-        SELECT o.*, 
+    $result = $conn->query("
+        SELECT o.*,
                g.title as gig_title,
                c.name as client_name,
                f.name as freelancer_name
@@ -60,8 +60,8 @@ try {
         ORDER BY o.created_at DESC
         LIMIT 10
     ");
-    $recent_orders = $stmt->fetchAll();
-    
+    $recent_orders = $result->fetch_all(MYSQLI_ASSOC);
+
 } catch (Exception $e) {
     error_log($e->getMessage());
     die('Error loading dashboard data');

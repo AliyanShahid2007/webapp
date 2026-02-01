@@ -8,20 +8,20 @@ requireRole('client');
 $status_filter = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Build query
     $where_clause = "o.client_id = ?";
     $params = [$user_id];
-    
+
     if ($status_filter && in_array($status_filter, ['pending', 'accepted', 'in_progress', 'completed', 'canceled'])) {
         $where_clause .= " AND o.status = ?";
         $params[] = $status_filter;
     }
-    
+
     // Get orders
-    $stmt = $pdo->prepare("
-        SELECT o.*, 
+    $stmt = $conn->prepare("
+        SELECT o.*,
                g.title as gig_title,
                u.name as freelancer_name,
                fp.profile_pic,
@@ -33,17 +33,23 @@ try {
         WHERE $where_clause
         ORDER BY o.created_at DESC
     ");
-    $stmt->execute($params);
-    $orders = $stmt->fetchAll();
-    
+    $stmt->bind_param(str_repeat("s", count($params)), ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $orders = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
     // Get counts for filters
-    $stmt = $pdo->prepare("SELECT status, COUNT(*) as count FROM orders WHERE client_id = ? GROUP BY status");
-    $stmt->execute([$user_id]);
+    $stmt = $conn->prepare("SELECT status, COUNT(*) as count FROM orders WHERE client_id = ? GROUP BY status");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $status_counts = [];
-    foreach ($stmt->fetchAll() as $row) {
+    while ($row = $result->fetch_assoc()) {
         $status_counts[$row['status']] = $row['count'];
     }
-    
+    $stmt->close();
+
 } catch (Exception $e) {
     error_log($e->getMessage());
     $orders = [];
@@ -56,7 +62,7 @@ try {
         <h2 style="color: var(--text-primary);">
             <i class="fas fa-shopping-cart"></i> My Orders
         </h2>
-        <a href="/browse-gigs.php" class="btn btn-primary">
+        <a href="<?php echo $base_path ?>/browse-gigs.php" class="btn btn-primary">
             <i class="fas fa-plus"></i> Order New Gig
         </a>
     </div>
@@ -224,7 +230,7 @@ try {
                 <?php endif; ?>
             </p>
             <?php if (!$status_filter): ?>
-                <a href="/browse-gigs.php" class="btn btn-primary btn-lg">
+                <a href="<?php echo $base_path ?>/browse-gigs.php" class="btn btn-primary btn-lg">
                     <i class="fas fa-search"></i> Browse Gigs
                 </a>
             <?php endif; ?>

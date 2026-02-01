@@ -12,12 +12,15 @@ if (!$user_id || !in_array($action, ['approve', 'reject', 'suspend_7days', 'susp
 }
 
 try {
-    $pdo = getPDOConnection();
-    
+    $conn = getDBConnection();
+
     // Get user data
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->execute([$user_id]);
-    $user = $stmt->fetch();
+    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
     
     if (!$user) {
     redirectWithMessage('/admin/dashboard.php', 'User not found', 'danger');
@@ -30,34 +33,44 @@ try {
     
     switch ($action) {
         case 'approve':
-            $stmt = $pdo->prepare("UPDATE users SET status = 'active' WHERE id = ?");
-            $stmt->execute([$user_id]);
+            $stmt = $conn->prepare("UPDATE users SET status = 'active' WHERE id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
             redirectWithMessage('/admin/users.php', 'User approved successfully', 'success');
             break;
             
         case 'reject':
             // Delete user and related data
-            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-            $stmt->execute([$user_id]);
+            $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
             redirectWithMessage('/admin/users.php', 'User rejected and removed', 'success');
             break;
             
         case 'suspend_7days':
             $suspended_until = date('Y-m-d H:i:s', strtotime('+7 days'));
-            $stmt = $pdo->prepare("UPDATE users SET status = 'suspended_7days', suspended_until = ? WHERE id = ?");
-            $stmt->execute([$suspended_until, $user_id]);
+            $stmt = $conn->prepare("UPDATE users SET status = 'suspended_7days', suspended_until = ? WHERE id = ?");
+            $stmt->bind_param("si", $suspended_until, $user_id);
+            $stmt->execute();
+            $stmt->close();
             redirectWithMessage('/admin/users.php', 'User suspended for 7 days', 'success');
             break;
             
         case 'suspend_permanent':
-            $stmt = $pdo->prepare("UPDATE users SET status = 'suspended_permanent', suspended_until = NULL WHERE id = ?");
-            $stmt->execute([$user_id]);
+            $stmt = $conn->prepare("UPDATE users SET status = 'suspended_permanent', suspended_until = NULL WHERE id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
             redirectWithMessage('/admin/users.php', 'User permanently suspended', 'success');
             break;
             
         case 'activate':
-            $stmt = $pdo->prepare("UPDATE users SET status = 'active', suspended_until = NULL WHERE id = ?");
-            $stmt->execute([$user_id]);
+            $stmt = $conn->prepare("UPDATE users SET status = 'active', suspended_until = NULL WHERE id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
             redirectWithMessage('/admin/users.php', 'User activated successfully', 'success');
             break;
 
@@ -78,15 +91,21 @@ try {
             }
 
             // Check if email is already taken by another user
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
-            $stmt->execute([$email, $user_id]);
-            if ($stmt->fetch()) {
+            $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+            $stmt->bind_param("si", $email, $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->fetch_assoc()) {
+                $stmt->close();
                 redirectWithMessage(BASE_PATH . '/admin/manage-user.php?id=' . $user_id, 'Email already in use', 'danger');
             }
+            $stmt->close();
 
             // Update user
-            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, role = ?, status = ? WHERE id = ?");
-            $stmt->execute([$name, $email, $role, $status, $user_id]);
+            $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, role = ?, status = ? WHERE id = ?");
+            $stmt->bind_param("sssssi", $name, $email, $role, $status, $user_id);
+            $stmt->execute();
+            $stmt->close();
 
             redirectWithMessage('/admin/users.php', 'User updated successfully', 'success');
             break;

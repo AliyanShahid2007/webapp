@@ -9,12 +9,12 @@ if (!isLoggedIn() || getCurrentUserRole() != 'admin') {
 
 // Get users
 try {
-    $pdo = getPDOConnection();
-    $stmt = $pdo->query("
+    $conn = getDBConnection();
+    $result = $conn->query("
         SELECT * FROM users
         ORDER BY created_at DESC
     ");
-    $users = $stmt->fetchAll();
+    $users = $result->fetch_all(MYSQLI_ASSOC);
 } catch (Exception $e) {
     error_log($e->getMessage());
     $users = [];

@@ -13,10 +13,10 @@ if (!$order_id) {
 }
 
 try {
-    $pdo = getPDOConnection();
+    $conn = getDBConnection();
 
     // Get order details with freelancer ownership check
-    $stmt = $pdo->prepare("
+    $stmt = $conn->prepare("
         SELECT o.*,
                g.title as gig_title,
                g.description as gig_description,
@@ -28,8 +28,11 @@ try {
         JOIN users u ON o.client_id = u.id
         WHERE o.id = ? AND o.freelancer_id = ?
     ");
-    $stmt->execute([$order_id, $user_id]);
-    $order = $stmt->fetch();
+    $stmt->bind_param("ii", $order_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $order = $result->fetch_assoc();
+    $stmt->close();
 
     if (!$order) {
         // Order not found or doesn't belong to user
