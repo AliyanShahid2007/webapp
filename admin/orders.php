@@ -30,7 +30,7 @@ try {
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mt-5">
         <h1>Orders Management</h1>
-        <a href="<?php echo $base_path; ?>admin/dashboard.php" class="btn btn-outline">Back to Dashboard</a>
+        <a href="<?php echo $base_path;?>/admin/dashboard.php" class="btn btn-outline">Back to Dashboard</a>
     </div>
 
     <div class="card">
