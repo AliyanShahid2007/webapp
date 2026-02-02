@@ -26,8 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->close();
             
             if ($user && verifyPassword($password, $user['password'])) {
-                // Check if account is suspended
-                if (isAccountSuspended($user['id'])) {
+                // Prevent admin users from logging in through regular login
+                if ($user['role'] === 'admin') {
+                    $error = 'Admin users must login through the admin login page';
+                } elseif (isAccountSuspended($user['id'])) {
                     if ($user['status'] === 'suspended_permanent') {
                         $error = 'Your account has been permanently suspended';
                     } elseif ($user['status'] === 'suspended_7days') {
