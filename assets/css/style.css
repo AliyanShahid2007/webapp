@@ -115,6 +115,10 @@ body[data-theme="dark"] .stat-card p {
     color: #ffffff !important;
 }
 
+body[data-theme="dark"] .form-label {
+    color: #cbd5e1;
+}
+
 /* ==================== RESET & BASE STYLES ==================== */
 *, *::before, *::after {
     margin: 0;
