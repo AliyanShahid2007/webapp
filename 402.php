@@ -5,6 +5,19 @@ require_once 'includes/header.php';
 // Check if user is logged in to show appropriate buttons
 $isLoggedIn = isset($_SESSION['user_id']);
 $userRole = $isLoggedIn ? getCurrentUserRole() : null;
+
+// Check if user is blocked due to admin login attempts
+$isBlocked = false;
+$remainingTime = 0;
+$blockDuration = 5 * 60; // 5 minutes in seconds
+
+if (isset($_SESSION['admin_login_attempts']) && $_SESSION['admin_login_attempts'] >= 3) {
+    $timeSinceLastAttempt = time() - ($_SESSION['admin_last_attempt_time'] ?? 0);
+    if ($timeSinceLastAttempt < $blockDuration) {
+        $isBlocked = true;
+        $remainingTime = $blockDuration - $timeSinceLastAttempt;
+    }
+}
 ?>
 
 <style>
@@ -227,6 +240,27 @@ $userRole = $isLoggedIn ? getCurrentUserRole() : null;
                             </ul>
                         </div>
 
+                        <!-- Login Block Timer -->
+                        <?php if ($isBlocked): ?>
+                        <div class="timer-section">
+                            <div class="timer-container">
+                                <div class="timer-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="timer-content">
+                                    <h4>Access Temporarily Blocked</h4>
+                                    <p>You have exceeded the maximum number of login attempts. Please wait before trying again.</p>
+                                    <div class="countdown-timer">
+                                        <div class="timer-display" id="countdown-timer">
+                                            <span id="minutes">--</span>:<span id="seconds">--</span>
+                                        </div>
+                                        <p class="timer-label">Time remaining to access admin login</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
                         <!-- Action Buttons -->
                         <div class="btn-group-custom">
                             <a href="<?php echo BASE_PATH; ?>/" class="btn-custom btn-primary-custom">
@@ -280,5 +314,36 @@ $userRole = $isLoggedIn ? getCurrentUserRole() : null;
         </div>
     </div>
 </div>
+
+<script>
+<?php if ($isBlocked): ?>
+// Initialize countdown timer
+let remainingTime = <?php echo $remainingTime; ?>;
+
+function updateTimer() {
+    const minutesElement = document.getElementById('minutes');
+    const secondsElement = document.getElementById('seconds');
+
+    if (remainingTime <= 0) {
+        // Timer expired, redirect to admin login
+        window.location.href = '<?php echo BASE_PATH; ?>/admin/login.php';
+        return;
+    }
+
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+
+    // Format with leading zeros
+    minutesElement.textContent = minutes.toString().padStart(2, '0');
+    secondsElement.textContent = seconds.toString().padStart(2, '0');
+
+    remainingTime--;
+}
+
+// Update timer immediately and then every second
+updateTimer();
+setInterval(updateTimer, 1000);
+<?php endif; ?>
+</script>
 
 <?php require_once 'includes/footer.php'; ?>

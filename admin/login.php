@@ -7,7 +7,7 @@ initSession();
 
 // Check if user is blocked due to too many failed attempts
 $max_attempts = 3;
-$block_duration = 15 * 60; // 15 minutes in seconds
+$block_duration = 5 * 60; // 5 minutes in seconds
 
 if (isset($_SESSION['admin_login_attempts']) && $_SESSION['admin_login_attempts'] >= $max_attempts) {
     $time_since_last_attempt = time() - ($_SESSION['admin_last_attempt_time'] ?? 0);
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $remaining_attempts = $max_attempts - $_SESSION['admin_login_attempts'];
 
                 if ($_SESSION['admin_login_attempts'] >= $max_attempts) {
-                    $error = 'Too many failed login attempts. Access blocked for 15 minutes.';
+                    $error = 'Too many failed login attempts. Access blocked for 5 minutes.';
                 } else {
                     $error = 'Invalid username/email or password. ' . $remaining_attempts . ' attempt(s) remaining.';
                 }

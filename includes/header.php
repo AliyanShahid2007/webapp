@@ -92,7 +92,11 @@ if ($is_logged_in) {
                                 <?php echo htmlspecialchars($user_data['name']); ?>
                             </a>
                         </li>
-                        <li><a href="<?php echo $base_path; ?>/logout.php" class="btn btn-outline btn-sm">Logout</a></li>
+                        <?php if ($user_role == 'admin'): ?>
+                            <li><a href="<?php echo $base_path; ?>/admin/logout.php" class="btn btn-outline btn-sm">Logout</a></li>
+                        <?php else: ?>
+                            <li><a href="<?php echo $base_path; ?>/logout.php" class="btn btn-outline btn-sm">Logout</a></li>
+                        <?php endif; ?>
                     <?php endif; ?>
                     
                     <li>

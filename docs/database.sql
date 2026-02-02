@@ -159,9 +159,9 @@ INSERT INTO categories (name, description, icon) VALUES
 ('Photography', 'Product and portrait photography', 'fa-camera'),
 ('Voice Over', 'Professional voice recording services', 'fa-microphone');
 
--- Insert default admin user (password: admin123)
+-- Insert default admin user (password: Kon@in123)
 INSERT INTO users (name, username, email, password, role, status) VALUES
-('Admin', 'admin', 'admin@freelancehub.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'active');
+('Aliyan Shahid', 'aliyanshahid2007', 'admin@freelancehub.com', '$2y$12$TBNLFGuSbLiiYM23S3gR.em3mWZlpWAg3YHuVI7VMeqi9FDKOWsg2', 'admin', 'active');
 
 -- Insert sample freelancers
 INSERT INTO users (name, username, email, password, role, status) VALUES
