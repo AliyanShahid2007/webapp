@@ -150,36 +150,6 @@ try {
         </div>
     </div>
 </section>
-
-<!-- Categories Section -->
-<section class="container mb-5">
-    <div class="text-center mb-4">
-        <h2 style="font-weight: 700; color: var(--text-primary);">Popular Categories</h2>
-        <p style="color: var(--text-secondary);">Explore services by category</p>
-    </div>
-    
-    <div class="row">
-        <?php foreach ($categories as $category): ?>
-            <div class="col-md-3 col-sm-6 mb-3">
-                <a href="<?php echo $base_path; ?>/browse-gigs.php?category=<?php echo urlencode($category['name']); ?>" style="text-decoration: none;">
-                    <div class="card text-center" style="height: 100%; transition: var(--transition);">
-                        <div class="card-body">
-                            <i class="fas <?php echo htmlspecialchars($category['icon']); ?>"
-                               style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                            <h5 style="color: var(--text-primary);">
-                                <?php echo htmlspecialchars($category['name']); ?>
-                            </h5>
-                            <p style="color: var(--text-secondary); font-size: 0.9rem;">
-                                <?php echo htmlspecialchars($category['description']); ?>
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        <?php endforeach; ?>
-    </div>
-</section>
-
 <!-- Recent Gigs Section -->
 <?php if (count($recent_gigs) > 0): ?>
 <section class="container mb-5">
@@ -311,6 +281,34 @@ try {
     </div>
 </section>
 <?php endif; ?>
+<!-- Categories Section -->
+<section class="container mb-5">
+    <div class="text-center mb-4">
+        <h2 style="font-weight: 700; color: var(--text-primary);">Popular Categories</h2>
+        <p style="color: var(--text-secondary);">Explore services by category</p>
+    </div>
+    
+    <div class="row">
+        <?php foreach ($categories as $category): ?>
+            <div class="col-md-3 col-sm-6 mb-3">
+                <a href="<?php echo $base_path; ?>/browse-gigs.php?category=<?php echo urlencode($category['name']); ?>" style="text-decoration: none;">
+                    <div class="card text-center" style="height: 100%; transition: var(--transition);">
+                        <div class="card-body">
+                            <i class="fas <?php echo htmlspecialchars($category['icon']); ?>"
+                               style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                            <h5 style="color: var(--text-primary);">
+                                <?php echo htmlspecialchars($category['name']); ?>
+                            </h5>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                                <?php echo htmlspecialchars($category['description']); ?>
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</section>
 
 <!-- Features Section -->
 <section style="background: var(--card-bg); border-top: 1px solid var(--border-color); padding: 4rem 0; margin-bottom: 3rem;">
