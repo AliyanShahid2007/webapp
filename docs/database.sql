@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS gigs (
     status ENUM('active', 'inactive', 'deleted') NOT NULL DEFAULT 'active',
     deactivated_by_admin BOOLEAN DEFAULT FALSE,
     views INT DEFAULT 0,
+    image VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (freelancer_id) REFERENCES users(id) ON DELETE CASCADE,

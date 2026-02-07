@@ -397,6 +397,11 @@ try {
                     <?php foreach ($gigs as $gig): ?>
                         <div class="col-md-4 col-sm-6 mb-4">
                             <div class="card gig-card">
+                                <?php if ($gig['image']): ?>
+                                    <img src="<?php echo $base_path; ?>/<?php echo htmlspecialchars($gig['image']); ?>"
+                                         class="card-img-top" alt="Gig Image"
+                                         style="height: 200px; object-fit: cover;">
+                                <?php endif; ?>
                                 <div class="card-body">
                                     <!-- Freelancer Info -->
                                     <a href="<?php echo $base_path; ?>/freelancer-profile.php?id=<?php echo $gig['freelancer_id']; ?>" class="text-decoration-none" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">

@@ -43,6 +43,8 @@
     
     <!-- Custom JS -->
     <script src="<?php echo $base_path; ?>/assets/js/main.js"></script>
+    <!-- Chatbot JS -->
+    <script src="<?php echo $base_path; ?>/assets/js/chatbot.js"></script>
     
     <?php if (isset($extra_js)): ?>
         <?php echo $extra_js; ?>

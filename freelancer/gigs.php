@@ -124,11 +124,30 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="delivery_time" class="form-label">Delivery Time (days) *</label>
-                                <input type="number" id="delivery_time" name="delivery_time" class="form-control" 
-                                       placeholder="3" required min="1" max="90">
+                                <input type="number" id="delivery_time" name="delivery_time" class="form-control"
+                                       placeholder="3" required min="1" max="90"
+                                       value="<?php echo $show_edit_form ? $edit_gig['delivery_time'] : ''; ?>">
                             </div>
                         </div>
                         
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="image" class="form-label">Gig Image</label>
+                                <input type="file" id="image" name="image" class="form-control"
+                                       accept="image/*">
+                                <small style="color: var(--text-muted);">
+                                    Upload a high-quality image for your gig (JPG, PNG, GIF - Max 5MB)
+                                </small>
+                                <?php if ($show_edit_form && $edit_gig['image']): ?>
+                                    <div style="margin-top: 0.5rem;">
+                                        <small style="color: var(--text-secondary);">
+                                            Current image: <a href="<?php echo BASE_PATH; ?>/<?php echo htmlspecialchars($edit_gig['image']); ?>" target="_blank">View</a>
+                                        </small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="description" class="form-label">Description *</label>
@@ -158,6 +177,11 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
             <?php foreach ($gigs as $gig): ?>
                 <div class="col-md-6 mb-4">
                     <div class="card">
+                        <?php if ($gig['image']): ?>
+                            <img src="<?php echo BASE_PATH; ?>/<?php echo htmlspecialchars($gig['image']); ?>"
+                                 class="card-img-top" alt="Gig Image"
+                                 style="height: 200px; object-fit: cover;">
+                        <?php endif; ?>
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>

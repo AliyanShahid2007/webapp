@@ -1,0 +1,122 @@
+[
+    {
+        "path": "402.php",
+        "text": "402 Forbidden Access Denied Sorry, you don't have permission to access this page or perform this action. This might be because: You need to log in with appropriate privileges Your account doesn't have the required permissions The page you're trying to access is restricted Access Temporarily Blocked You have exceeded the maximum number of login attempts. Please wait before trying again. Time remaining to access admin login Go to Home Login Admin Dashboard Freelancer Dashboard Client Dashboard Go Back Need Help? Check if you're logged in with the correct account Contact support if you believe this is an error Try accessing the page again after refreshing"
+    },
+    {
+        "path": "about.php",
+        "text": "About FreelanceHub Our Mission FreelanceHub is dedicated to connecting talented freelancers with clients who need quality services. We believe in creating a platform where skills meet opportunities, and where both freelancers and clients can build meaningful professional relationships. Who We Are We are a team of passionate individuals committed to building a fair, transparent, and user-friendly marketplace for freelance services. Our platform is designed to empower freelancers to showcase their talents and help clients find the right professionals for their projects. Why Choose FreelanceHub? Secure Platform: Your transactions and data are protected with industry-standard security. Fair Pricing: No hidden fees. You know exactly what you're paying for. Quality Assurance: All freelancers are verified to ensure quality service delivery. Reliable Support: Our team is here to help you 24/7. Flexible Solutions: From small projects to large contracts, we've got you covered. Get Started Today Whether you're a freelancer looking to grow your client base or a client searching for skilled professionals, FreelanceHub is your gateway to success. Join our community today."
+    },
+    {
+        "path": "admin\\categories.php",
+        "text": "Categories Management Back to Dashboard Add New Category Category Name * Icon Class (FontAwesome) Description Add Category All Categories ID Name Description Icon Status Created Actions Edit Deactivate Activate Delete"
+    },
+    {
+        "path": "admin\\category-action.php",
+        "text": "Edit Category Back to Categories Category Name * Status Active Inactive Icon Class (FontAwesome) Description Update Category"
+    },
+    {
+        "path": "admin\\dashboard.php",
+        "text": "Admin Dashboard Welcome back, Total Users Pending Approvals Active Freelancers Active Clients Active Gigs Total Orders Pending Orders Completed Orders Pending Approvals Name Username Email Role Registered Actions Approve Reject View All Pending Users Recent Orders Order ID Gig Client Freelancer Budget Status Date View All Orders Quick Actions Manage Users Manage Gigs Manage Orders Manage Categories"
+    },
+    {
+        "path": "admin\\gigs.php",
+        "text": "Gigs Management Back to Dashboard ID Title Freelancer Budget Status Created Actions View Deactivate Activate Delete"
+    },
+    {
+        "path": "admin\\login.php",
+        "text": "Admin Login Access the administration panel Username or Email Password Login to Admin Panel Back to Homepage"
+    },
+    {
+        "path": "admin\\manage-user.php",
+        "text": "Manage User: Back to Users Name Email Role Client Freelancer Status Active Pending Suspended 7 Days Suspended Permanent Update User Quick Actions Activate Suspend 7 Days Suspend Permanent Reject & Delete"
+    },
+    {
+        "path": "admin\\orders.php",
+        "text": "Orders Management Back to Dashboard ID Gig Client Freelancer Price Status Created Actions View"
+    },
+    {
+        "path": "admin\\users.php",
+        "text": "Users Management Back to Dashboard ID Name Email Role Status Created Actions Manage"
+    },
+    {
+        "path": "browse-gigs.php",
+        "text": "Filters Search Category All Categories Budget Range Sort By Newest First Price: Low to High Price: High to Low Highest Rated Most Popular Apply Filters Clear Filters Matching Freelancers ( reviews) View Profile Browse Gigs gig found days View Details Previous Next No Gigs Found Try adjusting your filters or search terms Clear All Filters"
+    },
+    {
+        "path": "client\\dashboard.php",
+        "text": "Client Dashboard Welcome back, ! Total Orders Pending In Progress Total Spent Quick Actions Browse Gigs My Orders Top Rated Gigs Recent Orders by No orders yet. Start by browsing gigs! Browse Gigs View All Orders Recommended Gigs by View Browse All Gigs"
+    },
+    {
+        "path": "client\\order-details.php",
+        "text": "Order Details Back to Orders Order # Gig Details Category: Order Information Ordered: Delivery Time: days Budget: $ Requirements Freelancer Skills: Contact Actions Leave Review Back to Orders"
+    },
+    {
+        "path": "client\\orders.php",
+        "text": "My Orders Order New Gig All Orders Pending In Progress Completed ORDER ID by days View Details Leave Review No Orders Found No orders at the moment. You haven't placed any orders yet. Start by browsing our gigs! Browse Gigs"
+    },
+    {
+        "path": "client\\review.php",
+        "text": "Leave a Review Order Details by days delivery Completed Rating * Click to rate this freelancer Review Comment (Optional) Maximum 500 characters Submit Review Back to Orders"
+    },
+    {
+        "path": "contact.php",
+        "text": "Contact Us Thank You! Your message has been sent successfully. We'll get back to you soon. Error: Name * Email * Subject * Message * Send Message Other Ways to Reach Us Email: support@freelancehub.com Phone: +1 (555) 123-4567 Address: 123 Freelance Street, Tech City, TC 12345"
+    },
+    {
+        "path": "freelancer\\dashboard.php",
+        "text": "( reviews) Edit Profile View Public Profile Profile Completeness % complete To improve: Add bio Add category Add skills Upload profile picture Create your first gig Quick Links My Gigs Orders Browse Gigs Freelancer Dashboard Welcome back, ! Active Gigs Total Orders Pending Orders Total Earnings Quick Actions Create New Gig Update Profile View Pending Orders Recent Orders Order ID Gig Client Budget Status Date Actions View View All Orders No Orders Yet Start creating gigs to receive orders from clients Create Your First Gig"
+    },
+    {
+        "path": "freelancer\\gigs.php",
+        "text": "My Gigs Create New Gig Gig Title * Example: \"I will create a professional WordPress website\" Category * Select category Delivery Time (days) * Description * Cancel View Edit Deactivate Activate Deactivated by Admin Delete Price Days views order pending No Gigs Yet Create your first gig to start receiving orders from clients Create Your First Gig"
+    },
+    {
+        "path": "freelancer\\order-details.php",
+        "text": "Order Details Back to Orders Order # Gig Details Category: Order Information Ordered: Delivery Time: days Budget: $ Client Notes Client Contact Actions Accept Reject Start Work Complete Back to Orders"
+    },
+    {
+        "path": "freelancer\\orders.php",
+        "text": "My Orders All Orders Pending In Progress Completed ORDER ID Budget Accept Reject Start Work Complete View Details Client Notes: No Orders Found No orders at the moment. You haven't received any orders yet. View My Gigs"
+    },
+    {
+        "path": "freelancer\\profile.php",
+        "text": "Edit Profile Profile Picture Recommended: Square image, at least 300x300px. Max 5MB. Bio Write a compelling bio to attract clients Category Select your main category Skills Separate skills with commas Portfolio Images Upload portfolio images (Max 5 images, 5MB each) Save Profile Back to Dashboard"
+    },
+    {
+        "path": "freelancer-profile.php",
+        "text": "Completed Orders Active Gigs Contact Freelancer Skills About Portfolio Active Gigs ( ) No active gigs available days delivery View Details"
+    },
+    {
+        "path": "gig-details.php",
+        "text": "views ( reviews) View Profile About This Gig Portfolio About the Freelancer Skills More Gigs from View Total Price Delivery Time days Category Order Notes (Optional) Order Now You're viewing this as a freelancer. Clients can order this gig. Admin view Login to Order Don't have an account? Sign up Safe and secure Your payment is protected"
+    },
+    {
+        "path": "includes\\footer.php",
+        "text": "FreelanceHub Connect with talented freelancers and find quality services for your projects. Quick Links Browse Gigs About Us Contact Terms of Service Connect With Us \u00a9 FreelanceHub. All rights reserved."
+    },
+    {
+        "path": "includes\\header.php",
+        "text": "FreelanceHub FreelanceHub Home Browse Gigs Login Sign Up Dashboard Users Gigs Orders Dashboard My Gigs Orders Edit Profile Dashboard Browse Gigs My Orders Logout Logout Site Assistant Send"
+    },
+    {
+        "path": "index.php",
+        "text": "Find the Perfect Freelance Services Connect with talented freelancers worldwide and transform your ideas into reality with quality and efficiency Search Get Started Free Browse Gigs Browse Gigs 0 Active Freelancers 0 Available Gigs 0 Completed Orders 0 Happy Clients Trending Gigs Latest services from talented freelancers View Details Browse All Gigs Top Rated Freelancers Work with the best professionals in the industry ( reviews) View Profile Popular Categories Explore services by category Why Choose FreelanceHub? Everything you need for successful freelancing Secure Payments Protected transactions and secure payment processing for peace of mind Verified Freelancers Work with trusted, verified professionals with proven track records 24/7 Support Round-the-clock customer support to help you succeed Fast Delivery Get your projects done quickly with our efficient workflow Ready to Get Started? Join thousands of freelancers and clients who trust FreelanceHub for their success Join as Freelancer Join as Client Start Browsing"
+    },
+    {
+        "path": "login.php",
+        "text": "Login Welcome back to FreelanceHub Username or Email Password Login Don't have an account? Sign Up Demo Credentials Admin: admin / admin123 Register as Freelancer or Client to test other features"
+    },
+    {
+        "path": "register.php",
+        "text": "Create Account Join FreelanceHub today Go to Login Full Name Username At least 3 characters, letters, numbers and underscore only Email Address Password At least 6 characters Confirm Password I want to Sell Services As a Freelancer Buy Services As a Client Create Account Already have an account? Login"
+    },
+    {
+        "path": "terms.php",
+        "text": "Terms of Service 1. Acceptance of Terms By accessing and using FreelanceHub, you accept and agree to be bound by the terms and provision of this agreement. 2. User Accounts Users must provide accurate information when creating accounts. You are responsible for maintaining the confidentiality of your account credentials. 3. Service Usage FreelanceHub provides a platform for connecting freelancers and clients. We do not guarantee the quality or completion of any services. 4. Payment Terms All payments are processed through our secure payment system. Refunds are handled on a case-by-case basis. 5. Prohibited Activities Users may not engage in fraudulent activities, violate intellectual property rights, or post inappropriate content. 6. Termination We reserve the right to terminate accounts that violate these terms or engage in harmful activities. 7. Contact Information For questions about these terms, please contact us through our contact page."
+    },
+    {
+        "path": "TODO.md",
+        "text": "- [x] Create admin/categories.php: List all categories with options to view, edit, activate/deactivate, and delete. Include a form to add new categories. - [x] Create admin/category-action.php: Handle actions like add, edit, delete, activate, and deactivate categories. - [x] Test the new pages to ensure CRUD operations work correctly. - [x] Verify that category changes reflect in other parts of the site (e.g., gig creation, browsing)."
+    }
+]

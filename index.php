@@ -164,6 +164,11 @@ try {
         <?php foreach ($recent_gigs as $gig): ?>
             <div class="col-md-4 col-sm-6 mb-3">
                 <div class="card gig-card animate-on-scroll">
+                    <?php if ($gig['image']): ?>
+                        <img src="<?php echo $base_path; ?>/<?php echo htmlspecialchars($gig['image']); ?>"
+                             class="card-img-top" alt="Gig Image"
+                             style="height: 200px; object-fit: cover; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+                    <?php endif; ?>
                     <div class="card-body">
                         <a href="<?php echo $base_path; ?>/freelancer-profile.php?id=<?php echo $gig['freelancer_id']; ?>" class="text-decoration-none" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
                             <?php if ($gig['profile_pic']): ?>
@@ -309,7 +314,6 @@ try {
         <?php endforeach; ?>
     </div>
 </section>
-
 <!-- Features Section -->
 <section style="background: var(--card-bg); border-top: 1px solid var(--border-color); padding: 4rem 0; margin-bottom: 3rem;">
     <div class="container">

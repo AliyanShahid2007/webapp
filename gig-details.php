@@ -213,6 +213,11 @@ $page_title = $gig['title'];
                         <?php foreach ($other_gigs as $other_gig): ?>
                             <div class="col-md-4 mb-3">
                                 <div class="card" style="height: 100%;">
+                                    <?php if ($other_gig['image']): ?>
+                                        <img src="<?php echo BASE_PATH; ?>/<?php echo htmlspecialchars($other_gig['image']); ?>"
+                                             class="card-img-top" alt="Gig Image"
+                                             style="height: 150px; object-fit: cover;">
+                                    <?php endif; ?>
                                     <div class="card-body">
                                         <h6 style="color: var(--text-primary); margin-bottom: 1rem;">
                                             <?php echo htmlspecialchars(substr($other_gig['title'], 0, 50)); ?>...

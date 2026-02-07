@@ -28,6 +28,62 @@ try {
         }
     }
 
+    // Handle edit action
+    if ($action == 'edit' && $_SERVER['REQUEST_METHOD'] == 'POST') {
+        $title = sanitize($_POST['title'] ?? '');
+        $description = sanitize($_POST['description'] ?? '');
+        $category = sanitize($_POST['category'] ?? '');
+        $budget = (float)($_POST['budget'] ?? 0);
+        $delivery_time = (int)($_POST['delivery_time'] ?? 0);
+
+        if (empty($title) || empty($description) || empty($category) || $budget <= 0 || $delivery_time <= 0) {
+            redirectWithMessage('/freelancer/gigs.php?action=edit&id=' . $gig_id, 'All fields are required', 'danger');
+        }
+
+        // Handle image upload for edit
+        $image_path = $gig['image']; // Keep existing image by default
+        if (isset($_FILES['image']) && $_FILES['image']['error'] == UPLOAD_ERR_OK) {
+            $upload_dir = __DIR__ . '/../uploads/gigs/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
+
+            $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+            if (!in_array($file_extension, $allowed_extensions)) {
+                redirectWithMessage('/freelancer/gigs.php?action=edit&id=' . $gig_id, 'Invalid image format. Only JPG, PNG, and GIF are allowed.', 'danger');
+            }
+
+            if ($_FILES['image']['size'] > 5 * 1024 * 1024) { // 5MB limit
+                redirectWithMessage('/freelancer/gigs.php?action=edit&id=' . $gig_id, 'Image size too large. Maximum 5MB allowed.', 'danger');
+            }
+
+            $filename = uniqid('gig_') . '.' . $file_extension;
+            $target_path = $upload_dir . $filename;
+
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
+                // Delete old image if exists
+                if ($gig['image'] && file_exists(__DIR__ . '/../' . $gig['image'])) {
+                    unlink(__DIR__ . '/../' . $gig['image']);
+                }
+                $image_path = 'uploads/gigs/' . $filename;
+            } else {
+                redirectWithMessage('/freelancer/gigs.php?action=edit&id=' . $gig_id, 'Failed to upload image.', 'danger');
+            }
+        }
+
+        $stmt = $conn->prepare("
+            UPDATE gigs SET title = ?, description = ?, category = ?, budget = ?, delivery_time = ?, image = ?
+            WHERE id = ? AND freelancer_id = ?
+        ");
+        $stmt->bind_param("sssdissi", $title, $description, $category, $budget, $delivery_time, $image_path, $gig_id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+
+        redirectWithMessage('/freelancer/gigs.php', 'Gig updated successfully!', 'success');
+    }
+
     switch ($action) {
         case 'create':
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -41,12 +97,41 @@ try {
                     redirectWithMessage('/freelancer/gigs.php?action=create', 'All fields are required', 'danger');
                 }
 
+                // Handle image upload for create
+                $image_path = null;
+                if (isset($_FILES['image']) && $_FILES['image']['error'] == UPLOAD_ERR_OK) {
+                    $upload_dir = __DIR__ . '/../uploads/gigs/';
+                    if (!is_dir($upload_dir)) {
+                        mkdir($upload_dir, 0755, true);
+                    }
+
+                    $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+
+                    if (!in_array($file_extension, $allowed_extensions)) {
+                        redirectWithMessage('/freelancer/gigs.php?action=create', 'Invalid image format. Only JPG, PNG, and GIF are allowed.', 'danger');
+                    }
+
+                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) { // 5MB limit
+                        redirectWithMessage('/freelancer/gigs.php?action=create', 'Image size too large. Maximum 5MB allowed.', 'danger');
+                    }
+
+                    $filename = uniqid('gig_') . '.' . $file_extension;
+                    $target_path = $upload_dir . $filename;
+
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
+                        $image_path = 'uploads/gigs/' . $filename;
+                    } else {
+                        redirectWithMessage('/freelancer/gigs.php?action=create', 'Failed to upload image.', 'danger');
+                    }
+                }
+
                 $stmt = $conn->prepare("
-                    INSERT INTO gigs (freelancer_id, title, description, category, budget, delivery_time, status)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO gigs (freelancer_id, title, description, category, budget, delivery_time, status, image)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ");
                 $status = 'active';
-                $stmt->bind_param("isssdis", $user_id, $title, $description, $category, $budget, $delivery_time, $status);
+                $stmt->bind_param("isssdiss", $user_id, $title, $description, $category, $budget, $delivery_time, $status, $image_path);
                 $stmt->execute();
                 $stmt->close();
 

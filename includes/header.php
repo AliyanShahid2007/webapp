@@ -41,6 +41,8 @@ if ($is_logged_in) {
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo $base_path; ?>/assets/css/style.css">
+    <!-- Chatbot CSS -->
+    <link rel="stylesheet" href="<?php echo $base_path; ?>/assets/css/chatbot.css">
     
     <?php if (isset($extra_css)): ?>
         <?php echo $extra_css; ?>
@@ -112,7 +114,25 @@ if ($is_logged_in) {
             </div>
         </div>
     </nav>
-    
+    <!-- Chatbot widget (floating) -->
+    <div id="chatbot-widget" class="chatbot-widget">
+        <button id="chatbot-toggle" class="chatbot-toggle btn btn-primary">
+            <i class="fas fa-comments"></i>
+        </button>
+
+        <div id="chatbot-panel" class="chatbot-panel d-none">
+            <div class="chatbot-header">
+                <strong>Site Assistant</strong>
+                <button id="chatbot-close" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div id="chatbot-messages" class="chatbot-messages"></div>
+            <form id="chatbot-form" class="chatbot-form">
+                <input id="chatbot-input" class="form-control" placeholder="Ask about this site..." autocomplete="off" />
+                <button class="btn btn-primary" type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Flash Messages -->
     <?php
     $flash = getFlashMessage();
