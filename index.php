@@ -379,7 +379,7 @@ try {
             <?php if (!isLoggedIn()): ?>
                 <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                     <a href="<?php echo $base_path; ?>/register.php?role=freelancer" class="btn btn-lg btn-hover-lift" style="background: white; color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                        <i class="fas fa-user-tie me-2"></i> Join as Freelancer
+                        <i class="fas fa-user-tie me-2"></i> Become a Seller
                     </a>
                     <a href="<?php echo $base_path; ?>/register.php?role=client" class="btn btn-lg btn-hover-lift" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; backdrop-filter: blur(10px);">
                         <i class="fas fa-user-plus me-2"></i> Join as Client

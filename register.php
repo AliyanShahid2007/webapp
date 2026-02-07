@@ -167,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                <?php echo (isset($role) && $role == 'freelancer') || !isset($role) ? 'checked' : ''; ?>>
                                         <div class="card" style="padding: 1rem; text-align: center; border: 2px solid var(--border-color);">
                                             <i class="fas fa-laptop-code" style="font-size: 2rem; color: var(--primary-color);"></i>
-                                            <h6 style="margin-top: 0.5rem; color: var(--text-primary);">Sell Services</h6>
+                                            <h6 style="margin-top: 0.5rem; color: var(--text-primary);">Become a Seller</h6>
                                             <small style="color: var(--text-secondary);">As a Freelancer</small>
                                         </div>
                                     </label>
